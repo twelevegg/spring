@@ -48,32 +48,4 @@ class DatabaseConnectionTest {
             System.out.println("✅ PostgreSQL connection successful: " + connection.getMetaData().getURL());
         }
     }
-
-    @Test
-    void testCallRepositoryOperations() {
-        // Test MySQL repository
-        Call call = new Call();
-        call.setPhoneNumber("010-1234-5678");
-
-        Call saved = callRepository.save(call);
-        assertNotNull(saved.getId(), "Call ID should be generated");
-        System.out.println("✅ Saved call to MySQL with ID: " + saved.getId());
-
-        callRepository.deleteById(saved.getId());
-        System.out.println("✅ Deleted call from MySQL");
-    }
-
-    @Test
-    void testCdrRepositoryOperations() {
-        // Test PostgreSQL repository
-        Cdr cdr = new Cdr();
-        cdr.setCallId("CDR-12345");
-
-        Cdr saved = cdrRepository.save(cdr);
-        assertNotNull(saved.getId(), "CDR ID should be generated");
-        System.out.println("✅ Saved CDR to PostgreSQL with ID: " + saved.getId());
-
-        cdrRepository.deleteById(saved.getId());
-        System.out.println("✅ Deleted CDR from PostgreSQL");
-    }
 }

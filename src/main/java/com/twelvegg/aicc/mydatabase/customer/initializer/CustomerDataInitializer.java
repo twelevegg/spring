@@ -55,7 +55,7 @@ public class CustomerDataInitializer implements CommandLineRunner {
     }
 
     private boolean isTableEmpty() {
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM customer", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM customers", Integer.class);
         return count != null && count == 0;
     }
 

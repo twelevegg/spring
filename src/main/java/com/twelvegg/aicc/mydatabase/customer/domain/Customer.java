@@ -1,9 +1,6 @@
 package com.twelvegg.aicc.mydatabase.customer.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 @Entity
+@Table(name = "customers")
 @Getter
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -34,7 +32,9 @@ public class Customer {
     private int remainingContractMonths;
     private String isOptionalContract;
     private String hasWelfareCard;
+    @Column(name = "overage_last_month_1")
     private String overageLastMonth1;
+    @Column(name = "overage_last_month_2")
     private String overageLastMonth2;
     private String isDataCarryOver;
     private String isDataSharing;

@@ -1,4 +1,4 @@
-package com.twelvegg.aicc.mysql.customer.initializer;
+package com.twelvegg.aicc.mydatabase.customer.initializer;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
@@ -72,7 +72,7 @@ public class CustomerDataInitializer implements CommandLineRunner {
         Random random = new Random();
 
         for (int i = 1; i <= 20; i++) {
-            batchArgs.add(new Object[]{
+            batchArgs.add(new Object[] {
                     (long) random.nextInt(5) + 1,
                     (long) random.nextInt(5) + 1,
                     (long) random.nextInt(5) + 1,

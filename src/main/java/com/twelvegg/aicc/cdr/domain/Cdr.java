@@ -1,4 +1,4 @@
-package com.twelvegg.aicc.mysql.call.domain;
+package com.twelvegg.aicc.cdr.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,11 +8,11 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 
 @Entity
-@Table(name = "calls")
+@Table(name = "cdrs")
 @Getter
-public class Call {
+public class Cdr {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String phoneNumber;
+    private String callId;
 }

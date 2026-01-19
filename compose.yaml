@@ -8,11 +8,5 @@ services:
       - 'MYSQL_USER=myuser'
     ports:
       - '3306:3306'
-  postgres:
-    image: 'postgres:latest'
-    environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
-    ports:
-      - '5432:5432'
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d

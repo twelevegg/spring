@@ -18,8 +18,8 @@ database:
     username: myuser
     password: secret
     driver-class-name: com.mysql.cj.jdbc.Driver
-  postgres:
-    url: jdbc:postgresql://localhost:5432/mydatabase?ApplicationName=aicc
+  cdr:
+    url: jdbc:mysql://localhost:3306/cdr_db?createDatabaseIfNotExist=true
     username: myuser
     password: secret
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver

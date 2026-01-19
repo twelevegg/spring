@@ -1,12 +1,10 @@
 package com.twelvegg.aicc.config;
 
-import com.twelvegg.aicc.config.annotation.db.Mysql;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
+
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -19,9 +17,8 @@ import java.util.Objects;
 
 @Configuration
 @EnableTransactionManagement
-@EnableJpaRepositories(basePackages = "com.twelvegg.aicc.mysql",
-        includeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Mysql.class), entityManagerFactoryRef = "mysqlEntityManagerFactory", transactionManagerRef = "mysqlTransactionManager")
-public class MysqlJpaConfig {
+@EnableJpaRepositories(basePackages = "com.twelvegg.aicc.mydatabase", entityManagerFactoryRef = "mysqlEntityManagerFactory", transactionManagerRef = "mysqlTransactionManager")
+public class MydatabaseJpaConfig {
 
     @Primary
     @Bean(name = "mysqlEntityManagerFactory")
@@ -30,7 +27,7 @@ public class MysqlJpaConfig {
             @Qualifier("mysqlDataSource") DataSource dataSource) {
         return builder
                 .dataSource(dataSource)
-                .packages("com.twelvegg.aicc.mysql")
+                .packages("com.twelvegg.aicc.mydatabase")
                 .persistenceUnit("mysql")
                 .build();
     }

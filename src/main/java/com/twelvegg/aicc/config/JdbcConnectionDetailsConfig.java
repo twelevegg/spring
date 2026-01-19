@@ -21,17 +21,17 @@ public class JdbcConnectionDetailsConfig {
     @Value("${database.mysql.driver-class-name}")
     private String mysqlDriverClassName;
 
-    @Value("${database.postgres.url}")
-    private String postgresUrl;
+    @Value("${database.cdr.url}")
+    private String cdrUrl;
 
-    @Value("${database.postgres.username}")
-    private String postgresUsername;
+    @Value("${database.cdr.username}")
+    private String cdrUsername;
 
-    @Value("${database.postgres.password}")
-    private String postgresPassword;
+    @Value("${database.cdr.password}")
+    private String cdrPassword;
 
-    @Value("${database.postgres.driver-class-name}")
-    private String postgresDriverClassName;
+    @Value("${database.cdr.driver-class-name}")
+    private String cdrDriverClassName;
 
     @Bean
     @Qualifier("jdbcConnectionDetailsForAiccMysql1")
@@ -60,27 +60,27 @@ public class JdbcConnectionDetailsConfig {
     }
 
     @Bean
-    @Qualifier("jdbcConnectionDetailsForAiccPostgres1")
-    public JdbcConnectionDetails postgresJdbcConnectionDetails() {
+    @Qualifier("jdbcConnectionDetailsForAiccCdr1")
+    public JdbcConnectionDetails cdrJdbcConnectionDetails() {
         return new JdbcConnectionDetails() {
             @Override
             public String getJdbcUrl() {
-                return postgresUrl;
+                return cdrUrl;
             }
 
             @Override
             public String getUsername() {
-                return postgresUsername;
+                return cdrUsername;
             }
 
             @Override
             public String getPassword() {
-                return postgresPassword;
+                return cdrPassword;
             }
 
             @Override
             public String getDriverClassName() {
-                return postgresDriverClassName;
+                return cdrDriverClassName;
             }
         };
     }

@@ -1,4 +1,4 @@
-package com.twelvegg.aicc.postgres.cdr.domain;
+package com.twelvegg.aicc.cdr.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

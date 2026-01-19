@@ -31,6 +31,12 @@ public class DataSourceConfig {
         return dataSource;
     }
 
+    @Bean(name = "mysqlJdbcTemplate")
+    public org.springframework.jdbc.core.JdbcTemplate mysqlJdbcTemplate(
+            @Qualifier("mysqlDataSource") DataSource dataSource) {
+        return new org.springframework.jdbc.core.JdbcTemplate(dataSource);
+    }
+
     @Bean
     @Qualifier("postgresDataSource")
     public DataSource postgresDataSource(

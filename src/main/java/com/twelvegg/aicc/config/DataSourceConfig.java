@@ -38,9 +38,9 @@ public class DataSourceConfig {
     }
 
     @Bean
-    @Qualifier("postgresDataSource")
-    public DataSource postgresDataSource(
-            @Qualifier("jdbcConnectionDetailsForAiccPostgres1") JdbcConnectionDetails connectionDetails) {
+    @Qualifier("cdrDataSource")
+    public DataSource cdrDataSource(
+            @Qualifier("jdbcConnectionDetailsForAiccCdr1") JdbcConnectionDetails connectionDetails) {
         com.zaxxer.hikari.HikariDataSource dataSource = DataSourceBuilder.create()
                 .url(connectionDetails.getJdbcUrl())
                 .username(connectionDetails.getUsername())
@@ -49,7 +49,7 @@ public class DataSourceConfig {
                 .type(com.zaxxer.hikari.HikariDataSource.class)
                 .build();
 
-        dataSource.setPoolName("HikariPool-Postgres");
+        dataSource.setPoolName("HikariPool-Cdr");
         dataSource.setMaxLifetime(1800000); // 30 minutes
         dataSource.setConnectionTestQuery("SELECT 1");
         return dataSource;

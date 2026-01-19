@@ -14,12 +14,12 @@ spring:
 # Database configuration
 database:
   mysql:
-    url: jdbc:mysql://localhost:54345/mydatabase
+    url: jdbc:mysql://localhost:3306/mydatabase
     username: myuser
     password: secret
     driver-class-name: com.mysql.cj.jdbc.Driver
   postgres:
-    url: jdbc:postgresql://localhost:51832/mydatabase?ApplicationName=aicc
+    url: jdbc:postgresql://localhost:5432/mydatabase?ApplicationName=aicc
     username: myuser
     password: secret
     driver-class-name: org.postgresql.Driver

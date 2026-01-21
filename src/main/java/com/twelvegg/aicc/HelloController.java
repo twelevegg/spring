@@ -14,4 +14,10 @@ public class HelloController {
     public String hello() {
         return "Hello, Swagger!";
     }
+
+    @Operation(summary = "Test Exception", description = "Throws a CustomException for testing")
+    @GetMapping("/error-test")
+    public String errorTest() {
+        throw new com.twelvegg.aicc.exception.CustomException(com.twelvegg.aicc.exception.ErrorCode.INTERNAL_SERVER_ERROR);
+    }
 }

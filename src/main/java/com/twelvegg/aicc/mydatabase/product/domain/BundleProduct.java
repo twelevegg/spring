@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "bundle_products")
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -24,7 +23,7 @@ public class BundleProduct {
     @Column(columnDefinition = "TEXT")
     private String discountBenefit;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "`condition`", columnDefinition = "TEXT")
     private String condition;
 
     @Column(columnDefinition = "TEXT")

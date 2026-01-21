@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "mobile_plans")
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -22,6 +21,7 @@ public class MobilePlan {
     private String description;
 
     private String price;
+    @Column(name = "`condition`")
     private String condition;
     private String notes;
     private String providedData;

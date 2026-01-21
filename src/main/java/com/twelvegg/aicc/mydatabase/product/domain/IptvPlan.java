@@ -6,7 +6,6 @@ import lombok.*;
 @Entity
 @Table(name = "iptv_plans")
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder

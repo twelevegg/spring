@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import com.twelvegg.aicc.mydatabase.product.domain.InternetPlan;
 import com.twelvegg.aicc.mydatabase.product.domain.MobilePlan;
 import com.twelvegg.aicc.mydatabase.product.domain.IptvPlan;
@@ -18,7 +17,6 @@ import java.util.List;
 @Entity
 @Table(name = "customers")
 @Getter
-@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -26,6 +24,7 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "internet_plan_id")
     private InternetPlan internetPlan;
@@ -41,6 +40,7 @@ public class Customer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bundle_product_id")
     private BundleProduct bundleProduct;
+
     private String name;
     private Integer age;
     private String gender;

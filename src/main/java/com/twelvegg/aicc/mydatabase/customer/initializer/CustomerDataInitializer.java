@@ -22,41 +22,61 @@ public class CustomerDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        createTableIfNotExists();
-        if (isTableEmpty()) {
+        insertDummyPlans();
+        if (isTableEmpty("customers")) {
             insertDummyData();
         }
     }
 
-    private void createTableIfNotExists() {
-        String sql = "CREATE TABLE IF NOT EXISTS customers (" +
-                "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
-                "internet_plan_id BIGINT, " +
-                "mobile_plan_id BIGINT, " +
-                "iptv_plan_id BIGINT, " +
-                "bundle_product_id BIGINT, " +
-                "name VARCHAR(255), " +
-                "age VARCHAR(10), " +
-                "gender VARCHAR(10), " +
-                "phone_number VARCHAR(20), " +
-                "is_foreigner VARCHAR(5), " +
-                "contract_period_months INT, " +
-                "remaining_contract_months INT, " +
-                "is_optional_contract VARCHAR(5), " +
-                "has_welfare_card VARCHAR(5), " +
-                "overage_last_month_1 VARCHAR(255), " +
-                "overage_last_month_2 VARCHAR(255), " +
-                "is_data_carry_over VARCHAR(5), " +
-                "is_data_sharing VARCHAR(5), " +
-                "household_type VARCHAR(50), " +
-                "is_remote_work VARCHAR(5)" +
-                ")";
-        jdbcTemplate.execute(sql);
+    private void insertDummyPlans() {
+        if (isTableEmpty("internet_plans")) {
+            String sql = "INSERT INTO internet_plans (name, description, price, base_benefit) VALUES (?, ?, ?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
+            for (int i = 1; i <= 5; i++) {
+                batchArgs.add(new Object[] { "Internet Plan " + i, "Description " + i, "Price " + i, "Benefit " + i });
+            }
+            jdbcTemplate.batchUpdate(sql, batchArgs);
+            logger.info("INIT: Inserted dummy internet plans.");
+        }
+
+        if (isTableEmpty("mobile_plans")) {
+            String sql = "INSERT INTO mobile_plans (name, description, price, `condition`) VALUES (?, ?, ?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
+            for (int i = 1; i <= 5; i++) {
+                batchArgs.add(new Object[] { "Mobile Plan " + i, "Description " + i, "Price " + i, "Condition " + i });
+            }
+            jdbcTemplate.batchUpdate(sql, batchArgs);
+            logger.info("INIT: Inserted dummy mobile plans.");
+        }
+
+        if (isTableEmpty("iptv_plans")) {
+            String sql = "INSERT INTO iptv_plans (name, description, price_tv_only) VALUES (?, ?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
+            for (int i = 1; i <= 5; i++) {
+                batchArgs.add(new Object[] { "IPTV Plan " + i, "Description " + i, "Price " + i });
+            }
+            jdbcTemplate.batchUpdate(sql, batchArgs);
+            logger.info("INIT: Inserted dummy iptv plans.");
+        }
+
+        if (isTableEmpty("bundle_products")) {
+            String sql = "INSERT INTO bundle_products (name, description, `condition`) VALUES (?, ?, ?)";
+            List<Object[]> batchArgs = new ArrayList<>();
+            for (int i = 1; i <= 5; i++) {
+                batchArgs.add(new Object[] { "Bundle Product " + i, "Description " + i, "Condition " + i });
+            }
+            jdbcTemplate.batchUpdate(sql, batchArgs);
+            logger.info("INIT: Inserted dummy bundle products.");
+        }
     }
 
-    private boolean isTableEmpty() {
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM customers", Integer.class);
-        return count != null && count == 0;
+    private boolean isTableEmpty(String tableName) {
+        try {
+            Integer count = jdbcTemplate.queryForObject("SELECT count(*) FROM " + tableName, Integer.class);
+            return count != null && count == 0;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void insertDummyData() {
@@ -78,7 +98,7 @@ public class CustomerDataInitializer implements CommandLineRunner {
                     (long) random.nextInt(5) + 1,
                     (long) random.nextInt(5) + 1,
                     "Customer" + i,
-                    String.valueOf(20 + random.nextInt(40)), // Age 20-60
+                    String.valueOf(20 + random.nextInt(40)),
                     random.nextBoolean() ? "M" : "F",
                     "010-" + (1000 + random.nextInt(9000)) + "-" + (1000 + random.nextInt(9000)),
                     random.nextBoolean() ? "Y" : "N",

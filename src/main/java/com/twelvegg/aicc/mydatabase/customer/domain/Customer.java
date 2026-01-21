@@ -7,6 +7,13 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import com.twelvegg.aicc.mydatabase.product.domain.InternetPlan;
+import com.twelvegg.aicc.mydatabase.product.domain.MobilePlan;
+import com.twelvegg.aicc.mydatabase.product.domain.IptvPlan;
+import com.twelvegg.aicc.mydatabase.product.domain.BundleProduct;
+import com.twelvegg.aicc.mydatabase.call.domain.Call;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "customers")
@@ -19,12 +26,23 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long internetPlanId;
-    private Long mobilePlanId;
-    private Long iptvPlanId;
-    private Long bundleProductId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "internet_plan_id")
+    private InternetPlan internetPlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mobile_plan_id")
+    private MobilePlan mobilePlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "iptv_plan_id")
+    private IptvPlan iptvPlan;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bundle_product_id")
+    private BundleProduct bundleProduct;
     private String name;
-    private String age;
+    private Integer age;
     private String gender;
     private String phoneNumber;
     private String isForeigner;
@@ -40,4 +58,8 @@ public class Customer {
     private String isDataSharing;
     private String householdType;
     private String isRemoteWork;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "customer")
+    private List<Call> calls = new ArrayList<>();
 }

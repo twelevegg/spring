@@ -19,9 +19,9 @@ import java.util.List;
 public class Tenant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "tenant_id")
     private Long id;
 
+    @Column(unique = true)
     private String name;
     private String status;
     private LocalDateTime createdAt;

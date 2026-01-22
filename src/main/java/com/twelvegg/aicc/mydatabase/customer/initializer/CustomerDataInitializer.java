@@ -75,10 +75,10 @@ public class CustomerDataInitializer implements CommandLineRunner {
 
         for (int i = 1; i <= 20; i++) {
             batchArgs.add(new Object[] {
-                    (long) random.nextInt(5) + 1,
-                    (long) random.nextInt(5) + 1,
-                    (long) random.nextInt(5) + 1,
-                    (long) random.nextInt(5) + 1,
+                    1,
+                    1,
+                    1,
+                    1,
                     "Customer" + i,
                     String.valueOf(20 + random.nextInt(40)),
                     random.nextBoolean() ? "M" : "F",

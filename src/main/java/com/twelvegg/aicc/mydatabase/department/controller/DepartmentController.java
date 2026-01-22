@@ -1,6 +1,5 @@
 package com.twelvegg.aicc.mydatabase.department.controller;
 
-import com.twelvegg.aicc.mydatabase.department.domain.Department;
 import com.twelvegg.aicc.mydatabase.department.dto.DepartmentResponseDto;
 import com.twelvegg.aicc.mydatabase.department.service.DepartmentService;
 import io.swagger.v3.oas.annotations.Operation;

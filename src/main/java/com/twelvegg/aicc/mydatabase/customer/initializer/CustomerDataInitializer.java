@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+
 @Component
 public class CustomerDataInitializer implements CommandLineRunner {
 
@@ -29,44 +32,23 @@ public class CustomerDataInitializer implements CommandLineRunner {
     }
 
     private void insertDummyPlans() {
-        if (isTableEmpty("internet_plans")) {
-            String sql = "INSERT INTO internet_plans (name, description, price, base_benefit) VALUES (?, ?, ?, ?)";
-            List<Object[]> batchArgs = new ArrayList<>();
-            for (int i = 1; i <= 5; i++) {
-                batchArgs.add(new Object[] { "Internet Plan " + i, "Description " + i, "Price " + i, "Benefit " + i });
-            }
-            jdbcTemplate.batchUpdate(sql, batchArgs);
-            logger.info("INIT: Inserted dummy internet plans.");
-        }
+        executeSqlScriptIfTableEmpty("internet_plans", "sql/internet_plans_insert.sql");
+        executeSqlScriptIfTableEmpty("mobile_plans", "sql/mobile_plans_insert.sql");
+        executeSqlScriptIfTableEmpty("iptv_plans", "sql/iptv_plans_insert.sql");
+        executeSqlScriptIfTableEmpty("bundle_products", "sql/bundle_products_insert.sql");
+    }
 
-        if (isTableEmpty("mobile_plans")) {
-            String sql = "INSERT INTO mobile_plans (name, description, price, `condition`) VALUES (?, ?, ?, ?)";
-            List<Object[]> batchArgs = new ArrayList<>();
-            for (int i = 1; i <= 5; i++) {
-                batchArgs.add(new Object[] { "Mobile Plan " + i, "Description " + i, "Price " + i, "Condition " + i });
+    private void executeSqlScriptIfTableEmpty(String tableName, String scriptPath) {
+        if (isTableEmpty(tableName)) {
+            try {
+                ResourceDatabasePopulator populator = new ResourceDatabasePopulator(new ClassPathResource(scriptPath));
+                populator.setSqlScriptEncoding("UTF-8");
+                populator.execute(jdbcTemplate.getDataSource());
+                logger.info("INIT: Inserted data into " + tableName + " from " + scriptPath);
+            } catch (Exception e) {
+                logger.severe("INIT: Failed to insert data into " + tableName + " from " + scriptPath + ": "
+                        + e.getMessage());
             }
-            jdbcTemplate.batchUpdate(sql, batchArgs);
-            logger.info("INIT: Inserted dummy mobile plans.");
-        }
-
-        if (isTableEmpty("iptv_plans")) {
-            String sql = "INSERT INTO iptv_plans (name, description, price_tv_only) VALUES (?, ?, ?)";
-            List<Object[]> batchArgs = new ArrayList<>();
-            for (int i = 1; i <= 5; i++) {
-                batchArgs.add(new Object[] { "IPTV Plan " + i, "Description " + i, "Price " + i });
-            }
-            jdbcTemplate.batchUpdate(sql, batchArgs);
-            logger.info("INIT: Inserted dummy iptv plans.");
-        }
-
-        if (isTableEmpty("bundle_products")) {
-            String sql = "INSERT INTO bundle_products (name, description, `condition`) VALUES (?, ?, ?)";
-            List<Object[]> batchArgs = new ArrayList<>();
-            for (int i = 1; i <= 5; i++) {
-                batchArgs.add(new Object[] { "Bundle Product " + i, "Description " + i, "Condition " + i });
-            }
-            jdbcTemplate.batchUpdate(sql, batchArgs);
-            logger.info("INIT: Inserted dummy bundle products.");
         }
     }
 

@@ -13,6 +13,8 @@ public record MemberResponseDto(
         String name,
         String role,
         LocalDate hireDate,
+        String email,
+        String password,
         String status) {
     public static MemberResponseDto from(Member entity) {
         return MemberResponseDto.builder()
@@ -22,6 +24,8 @@ public record MemberResponseDto(
                 .name(entity.getName())
                 .role(entity.getRole())
                 .hireDate(entity.getHireDate())
+                .email(entity.getEmail())
+                .password(entity.getPassword())
                 .status(entity.getStatus())
                 .build();
     }

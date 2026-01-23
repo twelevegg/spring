@@ -31,6 +31,8 @@ public class Member {
     private String role;
     private LocalDate hireDate;
     private String status;
+    private String email;
+    private String password;
 
     @Builder.Default
     @OneToMany(mappedBy = "member")

@@ -1,4 +1,8 @@
 spring:
+  profiles:
+    include: 
+      - secret
+    active: dev
   application:
     name: aicc
   
@@ -10,16 +14,3 @@ spring:
       hibernate:
         format_sql: true
     show-sql: true
-
-# Database configuration
-database:
-  mysql:
-    url: jdbc:mysql://localhost:3306/mydatabase
-    username: myuser
-    password: secret
-    driver-class-name: com.mysql.cj.jdbc.Driver
-  cdr:
-    url: jdbc:mysql://localhost:3306/cdr_db?createDatabaseIfNotExist=true
-    username: myuser
-    password: secret
-    driver-class-name: com.mysql.cj.jdbc.Driver

@@ -3,6 +3,7 @@ package com.twelvegg.aicc.mydatabase.tenant.controller;
 import com.twelvegg.aicc.mydatabase.tenant.dto.TenantResponseDto;
 import com.twelvegg.aicc.mydatabase.tenant.service.TenantService;
 import io.swagger.v3.oas.annotations.Operation;
+import java.util.List;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -23,5 +24,11 @@ public class TenantController {
     @GetMapping("/{id}")
     public ResponseEntity<TenantResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(tenantService.findById(id));
+    }
+
+    @Operation(summary = "테넌트 목록 조회", description = "제 등록된 모든 테넌트 목록을 조회합니다.")
+    @GetMapping
+    public ResponseEntity<List<TenantResponseDto>> findAll() {
+        return ResponseEntity.ok(tenantService.findAll());
     }
 }

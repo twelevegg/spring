@@ -37,4 +37,8 @@ public class Member {
     @Builder.Default
     @OneToMany(mappedBy = "member")
     private List<MemberMetric> metrics = new ArrayList<>();
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }

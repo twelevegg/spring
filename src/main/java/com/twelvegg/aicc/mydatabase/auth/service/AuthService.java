@@ -8,4 +8,8 @@ public interface AuthService {
     AuthDto.TokenResponse login(AuthDto.LoginRequest request);
 
     AuthDto.TokenResponse refreshToken(String refreshTokenInput);
+
+    AuthDto.MemberInfoResponse getMe(Long memberId);
+
+    void changePassword(Long memberId, AuthDto.PasswordChangeRequest request);
 }

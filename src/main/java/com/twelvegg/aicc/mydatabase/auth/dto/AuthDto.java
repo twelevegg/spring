@@ -1,46 +1,33 @@
 package com.twelvegg.aicc.mydatabase.auth.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 public class AuthDto {
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class SignUpRequest {
-        private String tenantName;
-        private String email;
-        private String password;
-        private String memberName;
+    public record SignUpRequest(String tenantName, String email, String password, String memberName) {
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class LoginRequest {
-        private String tenantName;
-        private String email;
-        private String password;
+    public record LoginRequest(String tenantName, String email, String password) {
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class TokenResponse {
-        private String accessToken;
-        private String refreshToken;
+    public record PasswordChangeRequest(String currentPassword, String newPassword) {
     }
 
-    @Getter
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class RefreshRequest {
-        private String refreshToken;
+    @Builder
+    public record TokenResponse(String accessToken, String refreshToken) {
+    }
+
+    public record RefreshRequest(String refreshToken) {
+    }
+
+    @Builder
+    public record MemberInfoResponse(
+            Long id,
+            String email,
+            String name,
+            String tenantName,
+            String role,
+            String status,
+            java.time.LocalDate hireDate) {
     }
 }

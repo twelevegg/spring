@@ -30,22 +30,23 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthDto.TokenResponse signUp(AuthDto.SignUpRequest request) {
-        if (memberRepository.findByEmail(request.getEmail()).isPresent()) {
+        if (memberRepository.findByEmail(request.email()).isPresent()) {
             throw new CustomException(ErrorCode.ALREADY_EXISTING_EMAIL);
         }
 
-        Tenant tenant = tenantRepository.findByName(request.getTenantName())
-                .orElseGet(() -> tenantRepository.save(Tenant.builder()
-                        .name(request.getTenantName())
-                        .status("ACTIVE")
-                        .createdAt(LocalDateTime.now())
-                        .build()));
+        Tenant tenant = tenantRepository.findByName(request.tenantName())
+                .orElseGet(() -> tenantRepository.save(
+                        Tenant.builder()
+                                .name(request.tenantName())
+                                .status("ACTIVE")
+                                .createdAt(LocalDateTime.now())
+                                .build()));
 
         Member member = Member.builder()
                 .tenant(tenant)
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .name(request.getMemberName() != null ? request.getMemberName() : "이름없음")
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .name(request.memberName() != null ? request.memberName() : "이름없음")
                 .status("ACTIVE")
                 .role("USER")
                 .hireDate(java.time.LocalDate.now())
@@ -59,14 +60,14 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthDto.TokenResponse login(AuthDto.LoginRequest request) {
-        Member member = memberRepository.findByEmail(request.getEmail())
+        Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
-        if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
-        if (!member.getTenant().getName().equals(request.getTenantName())) {
+        if (!member.getTenant().getName().equals(request.tenantName())) {
             throw new CustomException(ErrorCode.TENANT_NOT_FOUND);
         }
 
@@ -99,14 +100,43 @@ public class AuthServiceImpl implements AuthService {
                 .build();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public AuthDto.MemberInfoResponse getMe(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return AuthDto.MemberInfoResponse.builder()
+                .id(member.getId())
+                .email(member.getEmail())
+                .name(member.getName())
+                .tenantName(member.getTenant().getName())
+                .role(member.getRole())
+                .status(member.getStatus())
+                .hireDate(member.getHireDate())
+                .build();
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(Long memberId, AuthDto.PasswordChangeRequest request) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+
+        member.updatePassword(passwordEncoder.encode(request.newPassword()));
+        memberRepository.save(member);
+    }
+
     private AuthDto.TokenResponse generateTokens(Member member, String tenantName) {
         String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getId(), tenantName);
         String refreshTokenStr = jwtTokenProvider.createRefreshToken(member.getEmail(), member.getId(), tenantName);
 
         RefreshToken refreshToken = refreshTokenRepository.findByMember(member)
-                .orElse(RefreshToken.builder()
-                        .member(member)
-                        .build());
+                .orElse(RefreshToken.builder().member(member).build());
 
         refreshToken.updateToken(refreshTokenStr, LocalDateTime.now().plusHours(3));
         refreshTokenRepository.save(refreshToken);

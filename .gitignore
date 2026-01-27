@@ -35,5 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
-~/.src/main/resources/application-secret.yaml
-~/.src/main/resources/application-prod.yaml
+src/main/resources/application-prod.yaml
+src/main/resources/application-secret.yaml
+.env

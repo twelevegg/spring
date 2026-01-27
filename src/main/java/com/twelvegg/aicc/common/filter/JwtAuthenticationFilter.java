@@ -19,9 +19,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // 스웨거, 인증, 에러 페이지는 제외하기
+        // 스웨거, 인증(로그인, 회원가입, 리프레시), 에러 페이지는 제외하기
         String path = request.getRequestURI();
-        if (path.startsWith("/api/v1/auth/") ||
+        if (path.equals("/api/v1/auth/signup") ||
+                path.equals("/api/v1/auth/login") ||
+                path.equals("/api/v1/auth/refresh") ||
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
                 path.equals("/error")) {

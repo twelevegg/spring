@@ -3,6 +3,7 @@ package com.twelvegg.aicc.mydatabase.member.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import com.twelvegg.aicc.mydatabase.tenant.domain.Tenant;
 import com.twelvegg.aicc.mydatabase.department.domain.Department;
 import java.util.ArrayList;
@@ -30,9 +31,16 @@ public class Member {
     private String name;
     private String role;
     private LocalDate hireDate;
+    /**
+     * Status: ACTIVE (Ready), AWAY (Break), ON_CALL (Busy), RESIGNED (Left)
+     */
     private String status;
     private String email;
     private String password;
+
+    private String shiftType;
+    private LocalTime workStartTime;
+    private LocalTime workEndTime;
 
     @Builder.Default
     @OneToMany(mappedBy = "member")

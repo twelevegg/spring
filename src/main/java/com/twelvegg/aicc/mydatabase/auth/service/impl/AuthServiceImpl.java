@@ -1,4 +1,4 @@
-package com.twelvegg.aicc.mydatabase.auth.service;
+package com.twelvegg.aicc.mydatabase.auth.service.impl;
 
 import com.twelvegg.aicc.common.util.JwtTokenProvider;
 import com.twelvegg.aicc.common.util.PasswordEncoder;
@@ -7,6 +7,7 @@ import com.twelvegg.aicc.exception.ErrorCode;
 import com.twelvegg.aicc.mydatabase.auth.domain.RefreshToken;
 import com.twelvegg.aicc.mydatabase.auth.dto.AuthDto;
 import com.twelvegg.aicc.mydatabase.auth.repository.RefreshTokenRepository;
+import com.twelvegg.aicc.mydatabase.auth.service.AuthService;
 import com.twelvegg.aicc.mydatabase.member.domain.Member;
 import com.twelvegg.aicc.mydatabase.member.repository.MemberRepository;
 import com.twelvegg.aicc.mydatabase.tenant.domain.Tenant;

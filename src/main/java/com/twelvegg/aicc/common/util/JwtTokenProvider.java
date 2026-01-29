@@ -70,6 +70,10 @@ public class JwtTokenProvider {
         return extractClaims(token).get("memberId", Long.class);
     }
 
+    public String getTenantName(String token) {
+        return extractClaims(token).get("tenantName", String.class);
+    }
+
     private Claims extractClaims(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }

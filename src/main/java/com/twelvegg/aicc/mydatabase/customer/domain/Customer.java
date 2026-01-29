@@ -11,6 +11,7 @@ import com.twelvegg.aicc.mydatabase.product.domain.MobilePlan;
 import com.twelvegg.aicc.mydatabase.product.domain.IptvPlan;
 import com.twelvegg.aicc.mydatabase.product.domain.BundleProduct;
 import com.twelvegg.aicc.mydatabase.call.domain.Call;
+import com.twelvegg.aicc.mydatabase.tenant.domain.Tenant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +25,10 @@ public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "internet_plan_id")

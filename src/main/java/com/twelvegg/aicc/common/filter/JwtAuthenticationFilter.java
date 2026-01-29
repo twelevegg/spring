@@ -37,6 +37,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwtTokenProvider.validateToken(token)) {
                 request.setAttribute("email", jwtTokenProvider.getEmail(token));
                 request.setAttribute("memberId", jwtTokenProvider.getMemberId(token));
+                request.setAttribute("tenant", jwtTokenProvider.getTenantName(token));
                 filterChain.doFilter(request, response);
                 return;
             }

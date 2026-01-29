@@ -1,6 +1,7 @@
 package com.twelvegg.aicc.mydatabase.customer.initializer;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
@@ -18,6 +19,8 @@ public class CustomerDataInitializer implements CommandLineRunner {
 
     private final JdbcTemplate jdbcTemplate;
     private static final Logger logger = Logger.getLogger(CustomerDataInitializer.class.getName());
+    @Value("${spring.profiles.active}")
+    private String activeProfile;
 
     public CustomerDataInitializer(@Qualifier("mysqlJdbcTemplate") JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -25,9 +28,11 @@ public class CustomerDataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        insertDummyPlans();
-        if (isTableEmpty("customers")) {
-            insertDummyData();
+        if (activeProfile.equals("dev")) {
+            insertDummyPlans();
+            if (isTableEmpty("customers")) {
+                insertDummyData();
+            }
         }
     }
 
@@ -62,19 +67,23 @@ public class CustomerDataInitializer implements CommandLineRunner {
     }
 
     private void insertDummyData() {
+        Long tenantId = ensureTenantExists();
+
         String sql = "INSERT INTO customers (" +
-                "internet_plan_id, mobile_plan_id, iptv_plan_id, bundle_product_id, name, age, gender, phone_number, " +
+                "tenant_id, internet_plan_id, mobile_plan_id, iptv_plan_id, bundle_product_id, name, age, gender, phone_number, "
+                +
                 "is_foreigner, contract_period_months, remaining_contract_months, is_optional_contract, has_welfare_card, "
                 +
                 "overage_last_month_1, overage_last_month_2, is_data_carry_over, is_data_sharing, household_type, is_remote_work) "
                 +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         List<Object[]> batchArgs = new ArrayList<>();
         Random random = new Random();
 
         for (int i = 1; i <= 20; i++) {
             batchArgs.add(new Object[] {
+                    tenantId,
                     1,
                     1,
                     1,
@@ -99,5 +108,23 @@ public class CustomerDataInitializer implements CommandLineRunner {
 
         jdbcTemplate.batchUpdate(sql, batchArgs);
         logger.info("INIT: Inserted dummy customer data into the database.");
+    }
+
+    private Long ensureTenantExists() {
+        try {
+            List<Long> tenantIds = jdbcTemplate.query("SELECT id FROM tenants LIMIT 1",
+                    (rs, rowNum) -> rs.getLong("id"));
+            if (!tenantIds.isEmpty()) {
+                return tenantIds.get(0);
+            }
+            // Create a default tenant
+            jdbcTemplate.update("INSERT INTO tenants (name, status, created_at) VALUES (?, ?, NOW())", "Default_Tenant",
+                    "ACTIVE");
+            return jdbcTemplate.queryForObject("SELECT id FROM tenants WHERE name = ?", Long.class, "Default_Tenant");
+        } catch (Exception e) {
+            logger.severe("INIT: Failed to ensure tenant exists: " + e.getMessage());
+            // Fallback or error
+            return 1L;
+        }
     }
 }

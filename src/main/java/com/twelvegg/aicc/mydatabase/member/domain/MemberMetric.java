@@ -22,4 +22,14 @@ public class MemberMetric {
     private Integer callCount;
     private Double stressScore;
     private Double burnoutRisk;
+
+    // 총 활동 시간
+    // 총 활동 시간 (단위: 초)
+    private Long totalLoginTime;
+    private Long totalBreakTime;
+    private Long totalTalkTime;
+    private Long totalReadyTime;
+
+    // 근무 지수
+    private Integer scheduleAdherenceScore; // %
 }

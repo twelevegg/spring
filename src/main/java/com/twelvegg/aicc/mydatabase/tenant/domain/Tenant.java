@@ -1,6 +1,7 @@
 package com.twelvegg.aicc.mydatabase.tenant.domain;
 
 import com.twelvegg.aicc.mydatabase.call.domain.Call;
+import com.twelvegg.aicc.mydatabase.customer.domain.Customer;
 import com.twelvegg.aicc.mydatabase.department.domain.Department;
 import com.twelvegg.aicc.mydatabase.member.domain.Member;
 import jakarta.persistence.*;
@@ -37,4 +38,8 @@ public class Tenant {
     @Builder.Default
     @OneToMany(mappedBy = "tenant")
     private List<Call> calls = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "tenant")
+    private List<Customer> customers = new ArrayList<>();
 }

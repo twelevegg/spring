@@ -20,6 +20,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         // 스웨거, 인증(로그인, 회원가입, 리프레시), 에러 페이지는 제외하기
+        if (request.getMethod().equals("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String path = request.getRequestURI();
         if (path.equals("/api/v1/auth/signup") ||
                 path.equals("/api/v1/auth/login") ||

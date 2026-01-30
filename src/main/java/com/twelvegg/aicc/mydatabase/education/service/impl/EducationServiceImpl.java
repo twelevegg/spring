@@ -15,6 +15,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class EducationServiceImpl implements EducationService {
 
     private final S3Service s3Service;
@@ -23,6 +24,8 @@ public class EducationServiceImpl implements EducationService {
     @Override
     @Transactional
     public EducationMaterialResponseDto uploadSecurely(MultipartFile file) {
+        log.info("🔒 [보안 업로드] 요청 수신. 원본파일명: {}, 파일크기: {}", file.getOriginalFilename(), file.getSize());
+
         // 1. 파일 비어있는지 체크
         if (file.isEmpty()) {
             throw new IllegalArgumentException("파일이 비어있습니다.");
@@ -44,6 +47,7 @@ public class EducationServiceImpl implements EducationService {
         } else {
             throw new IllegalArgumentException("허용되지 않는 파일 형식입니다. (PDF, PPTX만 가능)");
         }
+        log.info("✅ [보안 업로드] 파일 검증 통과. 타입: {}", type);
 
         // 4. 파일명 난수화 (UUID)
         String uuid = UUID.randomUUID().toString();
@@ -51,6 +55,7 @@ public class EducationServiceImpl implements EducationService {
 
         // 5. S3에 업로드 (난수화된 이름 사용)
         String s3Url = s3Service.upload(file, "education", storedFileName);
+        log.info("☁️ [보안 업로드] S3 업로드 완료. URL: {}", s3Url);
 
         // 6. DB에 메타데이터 저장
         EducationMaterial material = EducationMaterial.builder()
@@ -63,6 +68,8 @@ public class EducationServiceImpl implements EducationService {
                 .build();
 
         EducationMaterial saved = educationMaterialRepository.save(material);
+        log.info("💾 [보안 업로드] DB 저장 완료. ID: {}", saved.getId());
+
         return EducationMaterialResponseDto.from(saved);
     }
 }

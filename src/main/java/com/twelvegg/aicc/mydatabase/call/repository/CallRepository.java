@@ -5,7 +5,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface CallRepository extends JpaRepository<Call, Long> {
@@ -44,4 +48,13 @@ public interface CallRepository extends JpaRepository<Call, Long> {
 
     // Self Service Rate (상담원이 배정되지 않은 통화)
     long countByMemberIsNull();
+
+    long countByMember_IdAndStartTimeBetween(Long memberId, LocalDateTime start, LocalDateTime end);
+
+    List<Call> findTop3ByMember_IdOrderByStartTimeDesc(Long memberId);
+
+    Page<Call> findByMember_Id(Long memberId, Pageable pageable);
+
+    Page<Call> findByMember_IdAndStartTimeBetween(Long memberId, LocalDateTime start, LocalDateTime end,
+            Pageable pageable);
 }

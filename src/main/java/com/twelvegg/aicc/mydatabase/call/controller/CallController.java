@@ -1,7 +1,10 @@
 package com.twelvegg.aicc.mydatabase.call.controller;
 
 import com.twelvegg.aicc.mydatabase.call.dto.CallResponseDto;
+import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
+import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
 import com.twelvegg.aicc.mydatabase.call.service.CallService;
+import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +26,23 @@ public class CallController {
     @GetMapping("/{id}")
     public ResponseEntity<CallResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(callService.findById(id));
+    }
+
+    @Operation(summary = "통화 오디오 조회", description = "통화의 오디오 파일 경로를 조회합니다.")
+    @GetMapping("/{id}/audio")
+    public ResponseEntity<String> getAudioPath(@PathVariable Long id) {
+        return ResponseEntity.ok(callService.getAudioPath(id));
+    }
+
+    @Operation(summary = "통화 스크립트 조회", description = "통화의 전체 스크립트를 조회합니다.")
+    @GetMapping("/{id}/transcript")
+    public ResponseEntity<List<TranscriptDto>> getTranscript(@PathVariable Long id) {
+        return ResponseEntity.ok(callService.getTranscripts(id));
+    }
+
+    @Operation(summary = "통화 분석 결과 조회", description = "통화의 분석 결과(요약, 감정, 키워드 등)를 조회합니다.")
+    @GetMapping("/{id}/analysis")
+    public ResponseEntity<CallAnalysisResponseDto> getAnalysis(@PathVariable Long id) {
+        return ResponseEntity.ok(callService.getAnalysis(id));
     }
 }

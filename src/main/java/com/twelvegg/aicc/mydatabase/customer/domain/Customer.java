@@ -49,6 +49,7 @@ public class Customer {
     private String name;
     private Integer age;
     private String gender;
+    @Column(unique = true)
     private String phoneNumber;
     private String isForeigner;
     private int contractPeriodMonths;

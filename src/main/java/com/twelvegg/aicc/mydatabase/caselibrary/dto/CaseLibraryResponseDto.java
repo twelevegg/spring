@@ -8,14 +8,16 @@ import java.util.List;
 
 @Builder
 public record CaseLibraryResponseDto(
-        String id,
+        String caseLibraryId,
+        Long memberId,
         String title,
         LocalDate date,
         List<String> tags,
         String body) {
     public static CaseLibraryResponseDto from(CaseLibrary entity) {
         return CaseLibraryResponseDto.builder()
-                .id(entity.getId())
+                .caseLibraryId(entity.getCaseLibraryId())
+                .memberId(entity.getMember().getId())
                 .title(entity.getTitle())
                 .date(entity.getDate())
                 .tags(entity.getTags())

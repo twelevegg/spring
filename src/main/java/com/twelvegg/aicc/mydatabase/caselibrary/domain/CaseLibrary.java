@@ -7,6 +7,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,6 +16,8 @@ import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+
+import com.twelvegg.aicc.mydatabase.member.domain.Member;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,8 +32,12 @@ import java.util.List;
 @Builder
 public class CaseLibrary {
     @Id
-    @Column(length = 20)
-    private String id;
+    @Column(name = "case_library_id", length = 20)
+    private String caseLibraryId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(nullable = false)
     private String title;
@@ -38,7 +45,7 @@ public class CaseLibrary {
     private LocalDate date;
 
     @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "case_library_tags", joinColumns = @JoinColumn(name = "case_id"))
+    @CollectionTable(name = "case_library_tags", joinColumns = @JoinColumn(name = "case_library_id"))
     @Column(name = "tag")
     @Default
     private List<String> tags = new ArrayList<>();
@@ -46,7 +53,8 @@ public class CaseLibrary {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String body;
 
-    public void update(String title, String body, List<String> tags, LocalDate date) {
+    public void update(Member member, String title, String body, List<String> tags, LocalDate date) {
+        this.member = member;
         this.title = title;
         this.body = body;
         this.tags = tags != null ? new ArrayList<>(tags) : new ArrayList<>();

@@ -7,14 +7,16 @@ import com.twelvegg.aicc.mydatabase.caselibrary.dto.CaseLibraryRequestDto;
 import com.twelvegg.aicc.mydatabase.caselibrary.dto.CaseLibraryResponseDto;
 import com.twelvegg.aicc.mydatabase.caselibrary.repository.CaseLibraryRepository;
 import com.twelvegg.aicc.mydatabase.caselibrary.service.CaseLibraryService;
+import com.twelvegg.aicc.mydatabase.member.domain.Member;
+import com.twelvegg.aicc.mydatabase.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,10 +28,11 @@ public class CaseLibraryServiceImpl implements CaseLibraryService {
     private static final Pattern ID_PATTERN = Pattern.compile("K-(\\d+)", Pattern.CASE_INSENSITIVE);
 
     private final CaseLibraryRepository caseLibraryRepository;
+    private final MemberRepository memberRepository;
 
     @Override
     public List<CaseLibraryResponseDto> findAll() {
-        return caseLibraryRepository.findAllByOrderByDateDescIdDesc()
+        return caseLibraryRepository.findAllByOrderByDateDescCaseLibraryIdDesc()
                 .stream()
                 .map(CaseLibraryResponseDto::from)
                 .toList();
@@ -44,13 +47,17 @@ public class CaseLibraryServiceImpl implements CaseLibraryService {
 
     @Override
     @Transactional
-    public CaseLibraryResponseDto create(CaseLibraryRequestDto request) {
+    public CaseLibraryResponseDto create(Long memberId, CaseLibraryRequestDto request) {
         String nextId = nextCaseId();
+        List<String> tags = request.tags() != null ? new ArrayList<>(request.tags()) : new ArrayList<>();
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
         CaseLibrary caseLibrary = CaseLibrary.builder()
-                .id(nextId)
+                .caseLibraryId(nextId)
+                .member(member)
                 .title(request.title())
                 .body(request.body())
-                .tags(Optional.ofNullable(request.tags()).orElse(List.of()))
+                .tags(tags)
                 .date(LocalDate.now())
                 .build();
 
@@ -60,11 +67,14 @@ public class CaseLibraryServiceImpl implements CaseLibraryService {
 
     @Override
     @Transactional
-    public CaseLibraryResponseDto update(String id, CaseLibraryRequestDto request) {
+    public CaseLibraryResponseDto update(String id, Long memberId, CaseLibraryRequestDto request) {
         CaseLibrary caseLibrary = caseLibraryRepository.findById(id)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
 
         caseLibrary.update(
+                member,
                 request.title(),
                 request.body(),
                 request.tags(),
@@ -83,8 +93,8 @@ public class CaseLibraryServiceImpl implements CaseLibraryService {
     }
 
     private String nextCaseId() {
-        int nextNumber = caseLibraryRepository.findTopByOrderByIdDesc()
-                .map(CaseLibrary::getId)
+        int nextNumber = caseLibraryRepository.findTopByOrderByCaseLibraryIdDesc()
+                .map(CaseLibrary::getCaseLibraryId)
                 .map(this::extractNumber)
                 .orElse(0) + 1;
 

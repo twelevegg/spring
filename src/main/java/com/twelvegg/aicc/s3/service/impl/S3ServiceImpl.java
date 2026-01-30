@@ -23,11 +23,16 @@ public class S3ServiceImpl implements S3Service {
 
     @Override
     public String upload(MultipartFile file, String dirName) {
+        return upload(file, dirName, file.getOriginalFilename());
+    }
+
+    @Override
+    public String upload(MultipartFile file, String dirName, String customFileName) {
         if (file.isEmpty())
             throw new CustomException(ErrorCode.INVALID_FILE);
-        if (!file.getOriginalFilename().endsWith(".wav"))
-            throw new CustomException(ErrorCode.INVALID_FILE);
-        String fileName = dirName + "/" + file.getOriginalFilename();
+        
+        // Wave extension check removed for generic usage
+        String fileName = dirName + "/" + customFileName;
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentLength(file.getSize());

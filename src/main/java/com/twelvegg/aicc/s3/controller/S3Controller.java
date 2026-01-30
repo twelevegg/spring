@@ -24,6 +24,9 @@ public class S3Controller {
     @Operation(summary = "S3 파일 업로드 (wav만 가능)")
     @PostMapping(value = "/s3/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<String> uploadFile(@RequestPart("file") MultipartFile file) {
+        if (!file.getOriginalFilename().endsWith(".wav")) {
+            throw new RuntimeException("Only .wav files are allowed");
+        }
         return ResponseEntity.ok(s3Service.upload(file, "test"));
     }
 

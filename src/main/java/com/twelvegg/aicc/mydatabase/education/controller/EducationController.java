@@ -1,6 +1,6 @@
 package com.twelvegg.aicc.mydatabase.education.controller;
 
-import com.twelvegg.aicc.mydatabase.education.domain.EducationMaterial;
+import com.twelvegg.aicc.mydatabase.education.dto.EducationMaterialResponseDto;
 import com.twelvegg.aicc.mydatabase.education.service.EducationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -23,7 +23,7 @@ public class EducationController {
 
     @Operation(summary = "교육 자료 보안 업로드")
     @PostMapping(value = "/secure-upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<EducationMaterial> uploadSecurely(@RequestPart("file") MultipartFile file) {
+    public ResponseEntity<EducationMaterialResponseDto> uploadSecurely(@RequestPart("file") MultipartFile file) {
         return ResponseEntity.ok(educationService.uploadSecurely(file));
     }
 }

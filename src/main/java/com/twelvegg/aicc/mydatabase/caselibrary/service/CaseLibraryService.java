@@ -10,9 +10,9 @@ public interface CaseLibraryService {
 
     CaseLibraryResponseDto findById(String id);
 
-    CaseLibraryResponseDto create(CaseLibraryRequestDto request);
+    CaseLibraryResponseDto create(Long memberId, CaseLibraryRequestDto request);
 
-    CaseLibraryResponseDto update(String id, CaseLibraryRequestDto request);
+    CaseLibraryResponseDto update(String id, Long memberId, CaseLibraryRequestDto request);
 
     void delete(String id);
 }

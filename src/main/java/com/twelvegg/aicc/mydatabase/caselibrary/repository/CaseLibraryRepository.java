@@ -9,7 +9,7 @@ import java.util.Optional;
 
 @Repository
 public interface CaseLibraryRepository extends JpaRepository<CaseLibrary, String> {
-    List<CaseLibrary> findAllByOrderByDateDescIdDesc();
+    List<CaseLibrary> findAllByOrderByDateDescCaseLibraryIdDesc();
 
-    Optional<CaseLibrary> findTopByOrderByIdDesc();
+    Optional<CaseLibrary> findTopByOrderByCaseLibraryIdDesc();
 }

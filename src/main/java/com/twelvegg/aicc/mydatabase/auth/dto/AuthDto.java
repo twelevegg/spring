@@ -4,7 +4,7 @@ import lombok.Builder;
 
 public class AuthDto {
 
-    public record SignUpRequest(String tenantName, String email, String password, String memberName) {
+    public record SignUpRequest(String tenantName, String email, String password, String memberName, String role) {
     }
 
     public record LoginRequest(String tenantName, String email, String password) {

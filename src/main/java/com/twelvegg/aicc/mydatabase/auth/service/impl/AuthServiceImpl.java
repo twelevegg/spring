@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
                 .password(passwordEncoder.encode(request.password()))
                 .name(request.memberName() != null ? request.memberName() : "이름없음")
                 .status("ACTIVE")
-                .role("USER")
+                .role(normalizeRole(request.role()))
                 .hireDate(java.time.LocalDate.now())
                 .build();
 
@@ -146,5 +146,16 @@ public class AuthServiceImpl implements AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenStr)
                 .build();
+    }
+
+    private String normalizeRole(String role) {
+        if (role == null || role.isBlank()) {
+            return "assistant";
+        }
+        String normalized = role.trim().toLowerCase();
+        if (normalized.equals("admin") || normalized.equals("assistant")) {
+            return normalized;
+        }
+        return "assistant";
     }
 }

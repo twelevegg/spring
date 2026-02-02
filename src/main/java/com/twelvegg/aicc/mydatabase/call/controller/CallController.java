@@ -3,6 +3,7 @@ package com.twelvegg.aicc.mydatabase.call.controller;
 import com.twelvegg.aicc.mydatabase.call.dto.CallResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
+import com.twelvegg.aicc.mydatabase.call.dto.CallEndRequestDto;
 import com.twelvegg.aicc.mydatabase.call.service.CallService;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "통화 관리", description = "통화 정보 관리 API")
 @RestController
-@RequestMapping("/api/v1/calls")
+@RequestMapping("/ai/api/v1/calls")
 @RequiredArgsConstructor
 public class CallController {
 
@@ -26,6 +27,13 @@ public class CallController {
     @GetMapping("/{id}")
     public ResponseEntity<CallResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(callService.findById(id));
+    }
+
+    @Operation(summary = "상담 종료 후 데이터 저장", description = "FastAPI로부터 상담 분석 데이터를 수신하여 저장합니다.")
+    @org.springframework.web.bind.annotation.PostMapping("/end")
+    public ResponseEntity<Void> saveCallLog(@org.springframework.web.bind.annotation.RequestBody CallEndRequestDto requestDto) {
+        callService.saveCallLog(requestDto);
+        return ResponseEntity.ok().build();
     }
 
     @Operation(summary = "통화 오디오 조회", description = "통화의 오디오 파일 경로를 조회합니다.")

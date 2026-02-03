@@ -21,7 +21,6 @@ import java.util.Objects;
 public class MydatabaseJpaConfig {
 
     @Primary
-    @Primary
     @Bean(name = "mysqlEntityManagerFactory")
     public LocalContainerEntityManagerFactoryBean mysqlEntityManagerFactory(
             EntityManagerFactoryBuilder builder,

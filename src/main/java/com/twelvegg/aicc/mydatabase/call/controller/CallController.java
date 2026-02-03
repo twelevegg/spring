@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @Tag(name = "통화 관리", description = "통화 정보 관리 API")
 @RestController
-@RequestMapping("/ai/api/v1/calls")
+@RequestMapping("/api/v1/calls")
 @RequiredArgsConstructor
 public class CallController {
 

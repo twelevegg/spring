@@ -5,6 +5,7 @@ import com.twelvegg.aicc.mydatabase.call.dto.CallResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallEndRequestDto;
+import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import java.util.List;
 
 public interface CallService {
@@ -19,4 +20,6 @@ public interface CallService {
     CallAnalysisResponseDto getAnalysis(Long callId);
 
     void saveCallLog(CallEndRequestDto requestDto);
+
+    CallDetailResponseDto getDetail(Long callId);
 }

@@ -16,6 +16,8 @@ public record CallDetailResponseDto(
         Integer transferCount,
         BigDecimal estimatedCost,
         String customerName,
+        Integer customerAge,
+        String customerGender,
         String customerPhone,
         String audioPath,
         String summaryText,

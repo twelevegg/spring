@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
+import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +68,34 @@ public class CallServiceImpl implements CallService {
                 .sentimentScore(call.getPostCallSummary().getSentimentScore())
                 .keyword(call.getPostCallSummary().getKeyword())
                 .analyzedAt(call.getPostCallSummary().getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public CallDetailResponseDto getDetail(Long callId) {
+        Call call = callRepository.findById(callId)
+                .orElseThrow(() -> new CustomException(ErrorCode.RESOURCE_NOT_FOUND));
+        List<TranscriptDto> transcriptDtos = call.getTranscripts().stream()
+                .map(TranscriptDto::from)
+                .collect(Collectors.toList());
+
+        return CallDetailResponseDto.builder()
+                .id(call.getId())
+                .phoneNumber(call.getPhoneNumber())
+                .callType(call.getCallType())
+                .startTime(call.getStartTime())
+                .endTime(call.getEndTime())
+                .duration(call.getDuration())
+                .transferCount(call.getTransferCount())
+                .estimatedCost(call.getEstimatedCost())
+                .customerName(call.getCustomer() != null ? call.getCustomer().getName() : null)
+                .customerAge(call.getCustomer() != null ? call.getCustomer().getAge() : null)
+                .customerGender(call.getCustomer() != null ? call.getCustomer().getGender() : null)
+                .customerPhone(call.getCustomer() != null ? call.getCustomer().getPhoneNumber() : null)
+                .audioPath(call.getAudioPath())
+                .summaryText(call.getPostCallSummary() != null ? call.getPostCallSummary().getSummaryText() : null)
+                .keyword(call.getPostCallSummary() != null ? call.getPostCallSummary().getKeyword() : null)
+                .transcripts(transcriptDtos)
                 .build();
     }
 }

@@ -29,12 +29,7 @@ public class CallController {
         return ResponseEntity.ok(callService.findById(id));
     }
 
-    @Operation(summary = "상담 종료 후 데이터 저장", description = "FastAPI로부터 상담 분석 데이터를 수신하여 저장합니다.")
-    @org.springframework.web.bind.annotation.PostMapping("/end")
-    public ResponseEntity<Void> saveCallLog(@org.springframework.web.bind.annotation.RequestBody CallEndRequestDto requestDto) {
-        callService.saveCallLog(requestDto);
-        return ResponseEntity.ok().build();
-    }
+
 
     @Operation(summary = "통화 오디오 조회", description = "통화의 오디오 파일 경로를 조회합니다.")
     @GetMapping("/{id}/audio")

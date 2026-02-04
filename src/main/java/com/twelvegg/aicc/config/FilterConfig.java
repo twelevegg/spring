@@ -28,7 +28,7 @@ public class FilterConfig {
         FilterRegistrationBean<ApiKeyAuthFilter> registrationBean = new FilterRegistrationBean<>();
         registrationBean.setFilter(filter);
         // S2S 통신 경로 등록
-        registrationBean.addUrlPatterns("/ai/api/v1/calls/end", "/ai/api/v1/customers/search"); 
+        registrationBean.addUrlPatterns("/api/v1/calls/end", "/api/v1/customers/search"); 
         registrationBean.setOrder(0); // JWT 필터보다 먼저 실행
         return registrationBean;
     }

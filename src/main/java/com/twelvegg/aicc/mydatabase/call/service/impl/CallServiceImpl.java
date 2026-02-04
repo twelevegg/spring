@@ -13,6 +13,7 @@ import com.twelvegg.aicc.mydatabase.call.domain.PostCallSummary;
 import com.twelvegg.aicc.mydatabase.call.domain.Transcript;
 import com.twelvegg.aicc.mydatabase.customer.domain.Customer;
 import com.twelvegg.aicc.mydatabase.call.dto.CallEndRequestDto;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -87,40 +88,40 @@ public class CallServiceImpl implements CallService {
         // 1. 고객 조회 (전화번호로 조회, 없으면 null 처리 또는 기본 고객 할당)
         // CustomerRepository에 findByPhoneNumber가 있다고 가정
         Customer customer = null;
-        if (requestDto.getCustomerNumber() != null) {
+        if (requestDto.customerNumber() != null) {
             // S2S 호출이므로 "default" 테넌트로 가정하고 조회
-            customer = customerRepository.findByPhoneNumberAndTenant_Name(requestDto.getCustomerNumber(), "default").orElse(null);
+            customer = customerRepository.findByPhoneNumberAndTenant_Name(requestDto.customerNumber(), "default").orElse(null);
         }
 
         // 2. Call 생성
         Call call = Call.builder()
                 .customer(customer)
-                .phoneNumber(requestDto.getCustomerNumber())
-                .estimatedCost(requestDto.getEstimatedCost())
+                .phoneNumber(requestDto.customerNumber())
+                .estimatedCost(requestDto.estimatedCost() != null ? BigDecimal.valueOf(requestDto.estimatedCost()) : null)
                 .startTime(LocalDateTime.now()) // 임시: 현재 시간
                 .endTime(LocalDateTime.now())   // 임시: 현재 시간
                 .build();
         callRepository.save(call);
 
         // 3. PostCallSummary 생성
-        String keywords = requestDto.getKeyword() != null ? String.join(",", requestDto.getKeyword()) : "";
+        String keywords = requestDto.keyword() != null ? String.join(",", requestDto.keyword()) : "";
         PostCallSummary summary = PostCallSummary.builder()
                 .call(call)
-                .summaryText(requestDto.getSummaryText())
-                .cesScore(requestDto.getCesScore())
-                .csatScore(requestDto.getCsatScore())
-                .npsScore(requestDto.getNpsScore())
+                .summaryText(requestDto.summaryText())
+                .cesScore(requestDto.cesScore())
+                .csatScore(requestDto.csatScore())
+                .npsScore(requestDto.rpsScore())
                 .keyword(keywords)
                 .build();
         postCallSummaryRepository.save(summary);
 
         // 4. Transcript 생성
-        if (requestDto.getTranscripts() != null) {
-            List<Transcript> transcripts = requestDto.getTranscripts().stream()
+        if (requestDto.transcripts() != null) {
+            List<Transcript> transcripts = requestDto.transcripts().stream()
                 .map(t -> Transcript.builder()
                         .call(call)
-                        .speaker(String.valueOf(t.get("role"))) // dict map
-                        .content(String.valueOf(t.get("content")))
+                        .speaker(t.speaker())
+                        .content(t.transcript())
                         .timestamp(LocalDateTime.now())
                         .build())
                 .collect(Collectors.toList());

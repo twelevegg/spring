@@ -16,4 +16,4 @@ public record CallEndRequestDto(
         @JsonProperty("keyword") List<String> keyword,
         @JsonProperty("violence_count") Integer violenceCount
 ) {
-}
+}  

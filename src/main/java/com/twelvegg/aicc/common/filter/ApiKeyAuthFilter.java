@@ -25,7 +25,7 @@ public class ApiKeyAuthFilter implements Filter {
         
         // 필터 적용 경로 확인: /ai/api/v1/calls/end 또는 /ai/api/v1/customers/search
         String path = httpRequest.getRequestURI();
-        boolean isProtectedPath = path.startsWith("/ai/api/v1/calls/end") || path.startsWith("/ai/api/v1/customers/search");
+        boolean isProtectedPath = path.startsWith("/api/v1/calls/end") || path.startsWith("/api/v1/customers/search");
         
         if (!isProtectedPath) {
             chain.doFilter(request, response);

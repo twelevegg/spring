@@ -56,6 +56,9 @@ dependencies {
 
 	// Dotenv
 	implementation 'io.github.cdimascio:dotenv-java:3.0.0'
+
+	// Commons IO
+	implementation 'commons-io:commons-io:2.11.0'
 }
 
 tasks.named('test') {

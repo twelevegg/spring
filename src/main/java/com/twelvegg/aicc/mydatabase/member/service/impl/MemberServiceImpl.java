@@ -7,6 +7,7 @@ import com.twelvegg.aicc.mydatabase.member.dto.MemberResponseDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberCallStatsDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberRecentCallDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
+import com.twelvegg.aicc.mydatabase.member.dto.MemberSummaryResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.domain.Call;
 import com.twelvegg.aicc.mydatabase.call.repository.CallRepository;
@@ -92,6 +93,22 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
+    public List<MemberSummaryResponseDto> getMemberSummaries() {
+        return memberRepository.findAll().stream()
+                .map(member -> MemberSummaryResponseDto.of(member, callRepository.countByMemberId(member.getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public MemberResponseDto updateStatus(Long memberId, String status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        member.updateStatus(status);
+        return MemberResponseDto.from(member);
+    }
+
     private CallDetailResponseDto toCallDetailResponseDto(Call call) {
         List<TranscriptDto> transcriptDtos = call.getTranscripts().stream()
                 .map(TranscriptDto::from)
@@ -107,6 +124,8 @@ public class MemberServiceImpl implements MemberService {
                 .transferCount(call.getTransferCount())
                 .estimatedCost(call.getEstimatedCost())
                 .customerName(call.getCustomer() != null ? call.getCustomer().getName() : null)
+                .customerAge(call.getCustomer() != null ? call.getCustomer().getAge() : null)
+                .customerGender(call.getCustomer() != null ? call.getCustomer().getGender() : null)
                 .customerPhone(call.getCustomer() != null ? call.getCustomer().getPhoneNumber() : null)
                 .audioPath(call.getAudioPath())
                 .summaryText(call.getPostCallSummary() != null ? call.getPostCallSummary().getSummaryText() : null)

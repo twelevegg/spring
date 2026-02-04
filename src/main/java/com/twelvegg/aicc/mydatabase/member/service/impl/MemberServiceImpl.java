@@ -99,9 +99,13 @@ public class MemberServiceImpl implements MemberService {
 
         return CallDetailResponseDto.builder()
                 .id(call.getId())
+                .phoneNumber(call.getPhoneNumber())
+                .callType(call.getCallType())
                 .startTime(call.getStartTime())
                 .endTime(call.getEndTime())
                 .duration(call.getDuration())
+                .transferCount(call.getTransferCount())
+                .estimatedCost(call.getEstimatedCost())
                 .customerName(call.getCustomer() != null ? call.getCustomer().getName() : null)
                 .customerPhone(call.getCustomer() != null ? call.getCustomer().getPhoneNumber() : null)
                 .audioPath(call.getAudioPath())

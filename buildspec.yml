@@ -26,8 +26,9 @@ phases:
       - docker push "$ECR_REPO_URI:$IMAGE_TAG"
       - docker push "$ECR_REPO_URI:latest"
       - aws eks update-kubeconfig --name aicc-eks --region "$AWS_REGION"
-      - SPRING_API_KEY_B64=$(kubectl get secret aicc-fastapi-env -n "$K8S_NAMESPACE" -o jsonpath='{.data.SPRING_API_KEY}')
-      - if [ -z "$SPRING_API_KEY_B64" ]; then echo "SPRING_API_KEY missing in aicc-fastapi-env"; exit 1; fi
+      - SPRING_API_KEY=$(aws ssm get-parameter --name "/aicc/spring/SPRING_API_KEY" --with-decryption --query "Parameter.Value" --output text --region "$AWS_REGION")
+      - if [ -z "$SPRING_API_KEY" ]; then echo "SPRING_API_KEY missing in SSM /aicc/spring/SPRING_API_KEY"; exit 1; fi
+      - SPRING_API_KEY_B64=$(printf '%s' "$SPRING_API_KEY" | base64 | tr -d '\n')
       - kubectl patch secret aicc-spring-env -n "$K8S_NAMESPACE" --type='merge' -p "{\"data\":{\"SPRING_API_KEY\":\"${SPRING_API_KEY_B64}\"}}"
       - kubectl set image deployment/aicc-spring aicc-spring="$ECR_REPO_URI:$IMAGE_TAG"
       - kubectl rollout status deployment/aicc-spring

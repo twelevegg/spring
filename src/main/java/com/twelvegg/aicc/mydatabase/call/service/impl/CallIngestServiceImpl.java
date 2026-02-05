@@ -36,6 +36,9 @@ public class CallIngestServiceImpl implements CallIngestService {
     private final TenantRepository tenantRepository;
     private final MemberRepository memberRepository;
 
+    private static final java.time.format.DateTimeFormatter FORMATTER = java.time.format.DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Override
     public CallEndResponseDto saveCallEnd(CallEndRequestDto request) {
         LocalDateTime now = LocalDateTime.now();
@@ -56,6 +59,24 @@ public class CallIngestServiceImpl implements CallIngestService {
             member = memberRepository.findById(request.memberId()).orElse(null);
         }
 
+        LocalDateTime start = now;
+        if (request.startTime() != null && !request.startTime().isBlank()) {
+            try {
+                start = LocalDateTime.parse(request.startTime(), FORMATTER);
+            } catch (Exception e) {
+                // Formatting error handled by defaulting to 'now' or logging
+            }
+        }
+
+        LocalDateTime end = now;
+        if (request.endTime() != null && !request.endTime().isBlank()) {
+            try {
+                end = LocalDateTime.parse(request.endTime(), FORMATTER);
+            } catch (Exception e) {
+                // Formatting error handled
+            }
+        }
+
         Call call = callRepository.save(Call.builder()
                 .phoneNumber(request.customerNumber())
                 .customer(customer)
@@ -65,11 +86,13 @@ public class CallIngestServiceImpl implements CallIngestService {
                 .estimatedCost(request.estimatedCost() != null
                         ? BigDecimal.valueOf(request.estimatedCost())
                         : null)
-                .callType("AI")
-                .startTime(now)
-                .endTime(now)
-                .duration(0L)
-                .billsec(0L)
+                .callType(request.callType() != null ? request.callType() : "AI")
+                .startTime(start)
+                .endTime(end)
+                .duration(request.duration() != null ? request.duration() : 0L)
+                .billsec(request.billsec() != null ? request.billsec() : 0L)
+                .asteriskId(request.asteriskId())
+                .audioPath(request.audioPath())
                 .build());
 
         int transcriptCount = 0;

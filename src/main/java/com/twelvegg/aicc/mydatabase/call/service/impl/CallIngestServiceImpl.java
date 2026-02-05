@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -86,13 +88,12 @@ public class CallIngestServiceImpl implements CallIngestService {
                 .estimatedCost(request.estimatedCost() != null
                         ? BigDecimal.valueOf(request.estimatedCost())
                         : null)
-                .callType(request.callType() != null ? request.callType() : "AI")
+                .callType("ANSWERED")
                 .startTime(start)
                 .endTime(end)
                 .duration(request.duration() != null ? request.duration() : 0L)
                 .billsec(request.billsec() != null ? request.billsec() : 0L)
-                .asteriskId(request.asteriskId())
-                .audioPath(request.audioPath())
+                .audioPath("/mnt/data/audio/" + UUID.randomUUID().toString() + ".wav")
                 .build());
 
         int transcriptCount = 0;

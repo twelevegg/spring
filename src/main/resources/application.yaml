@@ -1,7 +1,8 @@
 spring:
+#  profiles:
+#    include: 
+#      - secret
   profiles:
-    include: 
-      - secret
     active: dev
   application:
     name: aicc

@@ -6,6 +6,8 @@ env:
     ECR_REGISTRY: 081338828582.dkr.ecr.ap-northeast-2.amazonaws.com
     ECR_REPO_URI: 081338828582.dkr.ecr.ap-northeast-2.amazonaws.com/aicc-spring
     K8S_NAMESPACE: default
+  parameter-store:
+    JWT_SECRET_KEY: "/aicc/backend/jwt-secret"
 
 phases:
   install:
@@ -30,5 +32,6 @@ phases:
       - if [ -z "$SPRING_API_KEY" ]; then echo "SPRING_API_KEY missing in SSM /aicc/spring/SPRING_API_KEY"; exit 1; fi
       - SPRING_API_KEY_B64=$(printf '%s' "$SPRING_API_KEY" | base64 | tr -d '\n')
       - kubectl patch secret aicc-spring-env -n "$K8S_NAMESPACE" --type='merge' -p "{\"data\":{\"SPRING_API_KEY\":\"${SPRING_API_KEY_B64}\"}}"
+      - kubectl set env deployment/aicc-spring JWT_SECRET_KEY=$JWT_SECRET_KEY
       - kubectl set image deployment/aicc-spring aicc-spring="$ECR_REPO_URI:$IMAGE_TAG"
       - kubectl rollout status deployment/aicc-spring

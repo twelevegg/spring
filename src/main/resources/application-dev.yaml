@@ -23,7 +23,7 @@ database:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
 jwt:
-  secret-key: secret
+  secret-key: ${JWT_SECRET_KEY}
   password: secret
 
 cloud:

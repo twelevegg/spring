@@ -5,6 +5,7 @@ import com.twelvegg.aicc.mydatabase.member.dto.MemberCallStatsDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberStatusUpdateRequest;
 import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberSummaryResponseDto;
+import com.twelvegg.aicc.mydatabase.member.dto.MemberNewHireResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -30,16 +31,23 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    @Operation(summary = "상담원 단건 조회", description = "ID로 상담원 정보를 조회합니다.")
-    @GetMapping("/{id}")
-    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(memberService.findById(id));
-    }
-
     @Operation(summary = "상담원 목록 조회", description = "상담원 이름/상태/지표 목록을 조회합니다.")
     @GetMapping
     public ResponseEntity<List<MemberSummaryResponseDto>> getMemberSummaries() {
         return ResponseEntity.ok(memberService.getMemberSummaries());
+    }
+
+    @Operation(summary = "신입 상담원 목록 조회", description = "최근 N개월 내 입사한 상담원 목록을 조회합니다.")
+    @GetMapping("/new")
+    public ResponseEntity<List<MemberNewHireResponseDto>> getNewHires(
+            @RequestParam(defaultValue = "3") int months) {
+        return ResponseEntity.ok(memberService.getNewHires(months));
+    }
+
+    @Operation(summary = "상담원 단건 조회", description = "ID로 상담원 정보를 조회합니다.")
+    @GetMapping("/{id:\\d+}")
+    public ResponseEntity<MemberResponseDto> findById(@PathVariable Long id) {
+        return ResponseEntity.ok(memberService.findById(id));
     }
 
     @Operation(summary = "상담원 상태 변경", description = "상담원의 상태를 변경합니다.")

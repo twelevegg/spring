@@ -8,6 +8,7 @@ import com.twelvegg.aicc.mydatabase.member.dto.MemberCallStatsDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberRecentCallDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberSummaryResponseDto;
+import com.twelvegg.aicc.mydatabase.member.dto.MemberNewHireResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.domain.Call;
 import com.twelvegg.aicc.mydatabase.call.repository.CallRepository;
@@ -100,6 +101,15 @@ public class MemberServiceImpl implements MemberService {
     public List<MemberSummaryResponseDto> getMemberSummaries() {
         return memberRepository.findAll().stream()
                 .map(member -> MemberSummaryResponseDto.of(member, callRepository.countByMemberId(member.getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberNewHireResponseDto> getNewHires(int months) {
+        int safeMonths = Math.max(0, months);
+        LocalDate cutoff = LocalDate.now().minusMonths(safeMonths);
+        return memberRepository.findByHireDateGreaterThanEqualOrderByHireDateDesc(cutoff).stream()
+                .map(MemberNewHireResponseDto::from)
                 .collect(Collectors.toList());
     }
 

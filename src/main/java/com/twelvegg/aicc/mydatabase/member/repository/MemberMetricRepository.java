@@ -1,6 +1,8 @@
 package com.twelvegg.aicc.mydatabase.member.repository;
 
 import com.twelvegg.aicc.mydatabase.member.domain.MemberMetric;
+import com.twelvegg.aicc.mydatabase.member.domain.Member;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
@@ -39,4 +41,6 @@ public interface MemberMetricRepository extends JpaRepository<MemberMetric, Long
 
     @Query("SELECT AVG(m.scheduleAdherenceScore) FROM MemberMetric m WHERE m.member.id = :memberId")
     Double findAvgScheduleAdherenceByMemberId(@Param("memberId") Long memberId);
+
+    Optional<MemberMetric> findByMember(Member member);
 }

@@ -68,7 +68,7 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.INVALID_PASSWORD);
         }
 
-        if (!member.getTenant().getName().equals(request.tenantName())) {
+        if (!member.getTenant().getName().equalsIgnoreCase(request.tenantName())) {
             throw new CustomException(ErrorCode.TENANT_NOT_FOUND);
         }
 

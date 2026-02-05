@@ -26,7 +26,7 @@ public class CorsConfig {
             HttpServletResponse res = (HttpServletResponse) response;
 
             String origin = req.getHeader("Origin");
-            if (ALLOWED_ORIGINS.contains(origin)) {
+            if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
                 res.setHeader("Access-Control-Allow-Origin", origin);
                 res.setHeader("Vary", "Origin");
                 res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -41,7 +41,7 @@ public class CorsConfig {
 
             chain.doFilter(request, response);
 
-            if (ALLOWED_ORIGINS.contains(origin)) {
+            if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
                 res.setHeader("Access-Control-Allow-Origin", origin);
                 res.setHeader("Vary", "Origin");
                 res.setHeader("Access-Control-Allow-Credentials", "true");

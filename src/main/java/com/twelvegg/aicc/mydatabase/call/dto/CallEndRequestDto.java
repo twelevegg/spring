@@ -14,6 +14,9 @@ public record CallEndRequestDto(
         @JsonProperty("csat_score") Double csatScore,
         @JsonProperty("rps_score") Double rpsScore,
         @JsonProperty("keyword") List<String> keyword,
-        @JsonProperty("violence_count") Integer violenceCount
-) {
-}  
+        @JsonProperty("violence_count") Integer violenceCount,
+        @JsonProperty("duration") Long duration,
+        @JsonProperty("billsec") Long billsec,
+        @JsonProperty("start_time") String startTime, // Assuming ISO format or similar string from JSON
+        @JsonProperty("end_time") String endTime) {
+}

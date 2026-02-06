@@ -8,10 +8,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 
+import java.util.Set;
+
 @Configuration
 public class CorsConfig {
 
-    private static final String ALLOWED_ORIGIN = "http://localhost:5173";
+    private static final Set<String> ALLOWED_ORIGINS = Set.of(
+            "http://localhost:5173",
+            "https://www.csnavigator.cloud"
+    );
 
     @Bean
     public FilterRegistrationBean<Filter> corsFilter() {
@@ -21,7 +26,7 @@ public class CorsConfig {
             HttpServletResponse res = (HttpServletResponse) response;
 
             String origin = req.getHeader("Origin");
-            if (ALLOWED_ORIGIN.equals(origin)) {
+            if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
                 res.setHeader("Access-Control-Allow-Origin", origin);
                 res.setHeader("Vary", "Origin");
                 res.setHeader("Access-Control-Allow-Credentials", "true");
@@ -36,7 +41,7 @@ public class CorsConfig {
 
             chain.doFilter(request, response);
 
-            if (ALLOWED_ORIGIN.equals(origin)) {
+            if (origin != null && ALLOWED_ORIGINS.contains(origin)) {
                 res.setHeader("Access-Control-Allow-Origin", origin);
                 res.setHeader("Vary", "Origin");
                 res.setHeader("Access-Control-Allow-Credentials", "true");

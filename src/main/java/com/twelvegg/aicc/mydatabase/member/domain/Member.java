@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import com.twelvegg.aicc.mydatabase.tenant.domain.Tenant;
 import com.twelvegg.aicc.mydatabase.department.domain.Department;
 import java.util.ArrayList;
@@ -46,11 +47,15 @@ public class Member {
     @OneToMany(mappedBy = "member")
     private List<MemberMetric> metrics = new ArrayList<>();
 
+    // 마지막 상태 변경 시간
+    private LocalDateTime lastStatusUpdateTime;
+
     public void updatePassword(String password) {
         this.password = password;
     }
 
     public void updateStatus(String status) {
         this.status = status;
+        this.lastStatusUpdateTime = LocalDateTime.now();
     }
 }

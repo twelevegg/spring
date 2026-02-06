@@ -3,7 +3,6 @@ package com.twelvegg.aicc.mydatabase.call.controller;
 import com.twelvegg.aicc.mydatabase.call.dto.CallResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
-import com.twelvegg.aicc.mydatabase.call.dto.CallEndRequestDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import com.twelvegg.aicc.mydatabase.call.service.CallService;
 import java.util.List;
@@ -29,8 +28,6 @@ public class CallController {
     public ResponseEntity<CallResponseDto> findById(@PathVariable Long id) {
         return ResponseEntity.ok(callService.findById(id));
     }
-
-
 
     @Operation(summary = "통화 오디오 조회", description = "통화의 오디오 파일 경로를 조회합니다.")
     @GetMapping("/{id}/audio")

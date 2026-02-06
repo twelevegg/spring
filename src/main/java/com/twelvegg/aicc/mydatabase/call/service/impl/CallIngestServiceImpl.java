@@ -20,6 +20,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +37,9 @@ public class CallIngestServiceImpl implements CallIngestService {
     private final CustomerRepository customerRepository;
     private final TenantRepository tenantRepository;
     private final MemberRepository memberRepository;
+
+    private static final java.time.format.DateTimeFormatter FORMATTER = java.time.format.DateTimeFormatter
+            .ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     public CallEndResponseDto saveCallEnd(CallEndRequestDto request) {
@@ -56,6 +61,24 @@ public class CallIngestServiceImpl implements CallIngestService {
             member = memberRepository.findById(request.memberId()).orElse(null);
         }
 
+        LocalDateTime start = now;
+        if (request.startTime() != null && !request.startTime().isBlank()) {
+            try {
+                start = LocalDateTime.parse(request.startTime(), FORMATTER);
+            } catch (Exception e) {
+                // Formatting error handled by defaulting to 'now' or logging
+            }
+        }
+
+        LocalDateTime end = now;
+        if (request.endTime() != null && !request.endTime().isBlank()) {
+            try {
+                end = LocalDateTime.parse(request.endTime(), FORMATTER);
+            } catch (Exception e) {
+                // Formatting error handled
+            }
+        }
+
         Call call = callRepository.save(Call.builder()
                 .phoneNumber(request.customerNumber())
                 .customer(customer)
@@ -65,11 +88,12 @@ public class CallIngestServiceImpl implements CallIngestService {
                 .estimatedCost(request.estimatedCost() != null
                         ? BigDecimal.valueOf(request.estimatedCost())
                         : null)
-                .callType("AI")
-                .startTime(now)
-                .endTime(now)
-                .duration(0L)
-                .billsec(0L)
+                .callType("ANSWERED")
+                .startTime(start)
+                .endTime(end)
+                .duration(request.duration() != null ? request.duration() : 0L)
+                .billsec(request.billsec() != null ? request.billsec() : 0L)
+                .audioPath("/mnt/data/audio/" + UUID.randomUUID().toString() + ".wav")
                 .build());
 
         int transcriptCount = 0;

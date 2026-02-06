@@ -32,4 +32,24 @@ public class MemberMetric {
 
     // 근무 지수
     private Integer scheduleAdherenceScore; // %
+
+    public void addTotalLoginTime(Long time) {
+        this.totalLoginTime = (this.totalLoginTime == null ? 0 : this.totalLoginTime) + time;
+    }
+
+    public void addTotalBreakTime(Long time) {
+        this.totalBreakTime = (this.totalBreakTime == null ? 0 : this.totalBreakTime) + time;
+    }
+
+    public void addTotalTalkTime(Long time) {
+        this.totalTalkTime = (this.totalTalkTime == null ? 0 : this.totalTalkTime) + time;
+    }
+
+    public void addTotalReadyTime(Long time) {
+        this.totalReadyTime = (this.totalReadyTime == null ? 0 : this.totalReadyTime) + time;
+    }
+
+    public void updateScheduleAdherenceScore(Integer score) {
+        this.scheduleAdherenceScore = score;
+    }
 }

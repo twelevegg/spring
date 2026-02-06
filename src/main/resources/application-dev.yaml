@@ -3,7 +3,7 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -31,7 +31,7 @@ cloud:
     stack:
       auto: false
     region:
-      static: ap-northeast-2
+      static: ap-northeast-2 # [Restore] User confirmed Region is Seoul
     s3:
       bucket-name: ${S3_BUCKET_NAME:dummy-bucket}
     credentials:

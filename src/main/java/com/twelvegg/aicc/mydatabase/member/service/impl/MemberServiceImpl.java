@@ -7,9 +7,13 @@ import com.twelvegg.aicc.mydatabase.member.dto.MemberResponseDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberCallStatsDto;
 import com.twelvegg.aicc.mydatabase.member.dto.MemberRecentCallDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
+import com.twelvegg.aicc.mydatabase.member.dto.MemberSummaryResponseDto;
+import com.twelvegg.aicc.mydatabase.member.dto.MemberNewHireResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.domain.Call;
 import com.twelvegg.aicc.mydatabase.call.repository.CallRepository;
+import com.twelvegg.aicc.mydatabase.member.domain.MemberMetric;
+import com.twelvegg.aicc.mydatabase.member.repository.MemberMetricRepository;
 import com.twelvegg.aicc.mydatabase.member.repository.MemberRepository;
 import com.twelvegg.aicc.mydatabase.member.service.MemberService;
 import java.time.LocalDate;
@@ -30,6 +34,7 @@ public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
     private final CallRepository callRepository;
+    private final MemberMetricRepository memberMetricRepository;
 
     @Override
     public MemberResponseDto findById(Long id) {
@@ -92,6 +97,87 @@ public class MemberServiceImpl implements MemberService {
         }
     }
 
+    @Override
+    public List<MemberSummaryResponseDto> getMemberSummaries() {
+        return memberRepository.findAll().stream()
+                .map(member -> MemberSummaryResponseDto.of(member, callRepository.countByMemberId(member.getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MemberNewHireResponseDto> getNewHires(int months) {
+        int safeMonths = Math.max(0, months);
+        LocalDate cutoff = LocalDate.now().minusMonths(safeMonths);
+        return memberRepository.findByHireDateGreaterThanEqualOrderByHireDateDesc(cutoff).stream()
+                .map(MemberNewHireResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public MemberResponseDto updateStatus(Long memberId, String status) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        // 이전 상태
+        String oldStatus = member.getStatus();
+        LocalDateTime lastUpdate = member.getLastStatusUpdateTime();
+        LocalDateTime now = LocalDateTime.now();
+
+        // MemberMetric 가져오기 (없으면 생성)
+        MemberMetric metric = memberMetricRepository.findByMember(member)
+                .orElseGet(() -> {
+                    MemberMetric newMetric = MemberMetric.builder()
+                            .member(member)
+                            .totalLoginTime(0L)
+                            .totalBreakTime(0L)
+                            .totalTalkTime(0L)
+                            .totalReadyTime(0L)
+                            .scheduleAdherenceScore(0)
+                            .build();
+                    return memberMetricRepository.save(newMetric);
+                });
+
+        if (lastUpdate != null && oldStatus != null) {
+            long duration = java.time.Duration.between(lastUpdate, now).getSeconds();
+
+            // 이전 상태에 따라 시간 업데이트
+            // Status: ACTIVE (Ready), AWAY (Break), ON_CALL (Busy), RESIGNED (Left)
+            switch (oldStatus) {
+                case "ACTIVE": // Ready
+                    metric.addTotalReadyTime(duration);
+                    metric.addTotalLoginTime(duration);
+                    break;
+                case "AWAY": // Break
+                    metric.addTotalBreakTime(duration);
+                    metric.addTotalLoginTime(duration);
+                    break;
+                case "ON_CALL": // Busy (Talk) -> Assuming ON_CALL includes talking time or is treated as talk
+                                // time for now
+                    metric.addTotalTalkTime(duration);
+                    metric.addTotalLoginTime(duration);
+                    break;
+                default:
+                    // Other statuses might not contribute to specific metrics or login time
+                    break;
+            }
+
+            // 근무 지수 업데이트 (scheduleAdherenceScore)
+            // ((totalReadyTime + totalTalkTime) / totalLoginTime) * 100
+            long totalReady = metric.getTotalReadyTime() == null ? 0 : metric.getTotalReadyTime();
+            long totalTalk = metric.getTotalTalkTime() == null ? 0 : metric.getTotalTalkTime();
+            long totalLogin = metric.getTotalLoginTime() == null ? 0 : metric.getTotalLoginTime();
+
+            if (totalLogin > 0) {
+                int adherenceScore = (int) (((double) (totalReady + totalTalk) / totalLogin) * 100);
+                metric.updateScheduleAdherenceScore(adherenceScore);
+            }
+        }
+
+        member.updateStatus(status);
+        return MemberResponseDto.from(member);
+    }
+
     private CallDetailResponseDto toCallDetailResponseDto(Call call) {
         List<TranscriptDto> transcriptDtos = call.getTranscripts().stream()
                 .map(TranscriptDto::from)
@@ -99,10 +185,16 @@ public class MemberServiceImpl implements MemberService {
 
         return CallDetailResponseDto.builder()
                 .id(call.getId())
+                .phoneNumber(call.getPhoneNumber())
+                .callType(call.getCallType())
                 .startTime(call.getStartTime())
                 .endTime(call.getEndTime())
                 .duration(call.getDuration())
+                .transferCount(call.getTransferCount())
+                .estimatedCost(call.getEstimatedCost())
                 .customerName(call.getCustomer() != null ? call.getCustomer().getName() : null)
+                .customerAge(call.getCustomer() != null ? call.getCustomer().getAge() : null)
+                .customerGender(call.getCustomer() != null ? call.getCustomer().getGender() : null)
                 .customerPhone(call.getCustomer() != null ? call.getCustomer().getPhoneNumber() : null)
                 .audioPath(call.getAudioPath())
                 .summaryText(call.getPostCallSummary() != null ? call.getPostCallSummary().getSummaryText() : null)

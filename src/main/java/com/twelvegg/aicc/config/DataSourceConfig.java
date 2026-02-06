@@ -12,6 +12,10 @@ import javax.sql.DataSource;
 @Configuration
 public class DataSourceConfig {
 
+    private int mysqlMaxPoolSize = 6;
+
+    private int cdrMaxPoolSize = 4;
+
     @Bean
     @Primary
     @Qualifier("mysqlDataSource")
@@ -28,6 +32,7 @@ public class DataSourceConfig {
         dataSource.setPoolName("HikariPool-MySQL");
         dataSource.setMaxLifetime(1800000); // 30 minutes
         dataSource.setConnectionTestQuery("SELECT 1");
+        dataSource.setMaximumPoolSize(mysqlMaxPoolSize);
         return dataSource;
     }
 
@@ -52,6 +57,7 @@ public class DataSourceConfig {
         dataSource.setPoolName("HikariPool-Cdr");
         dataSource.setMaxLifetime(1800000); // 30 minutes
         dataSource.setConnectionTestQuery("SELECT 1");
+        dataSource.setMaximumPoolSize(cdrMaxPoolSize);
         return dataSource;
     }
 }

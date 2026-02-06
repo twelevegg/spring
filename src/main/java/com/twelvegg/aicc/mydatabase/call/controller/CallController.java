@@ -3,6 +3,7 @@ package com.twelvegg.aicc.mydatabase.call.controller;
 import com.twelvegg.aicc.mydatabase.call.dto.CallResponseDto;
 import com.twelvegg.aicc.mydatabase.call.dto.TranscriptDto;
 import com.twelvegg.aicc.mydatabase.call.dto.CallAnalysisResponseDto;
+import com.twelvegg.aicc.mydatabase.call.dto.CallDetailResponseDto;
 import com.twelvegg.aicc.mydatabase.call.service.CallService;
 import java.util.List;
 import io.swagger.v3.oas.annotations.Operation;
@@ -44,5 +45,11 @@ public class CallController {
     @GetMapping("/{id}/analysis")
     public ResponseEntity<CallAnalysisResponseDto> getAnalysis(@PathVariable Long id) {
         return ResponseEntity.ok(callService.getAnalysis(id));
+    }
+
+    @Operation(summary = "통화 상세 조회", description = "통화의 고객 정보와 대화 로그를 조회합니다.")
+    @GetMapping("/{id}/detail")
+    public ResponseEntity<CallDetailResponseDto> getDetail(@PathVariable Long id) {
+        return ResponseEntity.ok(callService.getDetail(id));
     }
 }

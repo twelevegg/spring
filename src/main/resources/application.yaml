@@ -1,11 +1,11 @@
 spring:
+#  profiles:
+#    include: 
+#      - secret
   profiles:
-    include: 
-      - secret
     active: dev
   application:
     name: aicc
-
   servlet:
     multipart:
       max-file-size: 100MB
@@ -13,3 +13,5 @@ spring:
 server:
   tomcat:
     max-swallow-size: 100MB
+fastapi:
+  secret_key: ${SPRING_API_KEY}

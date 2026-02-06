@@ -290,6 +290,7 @@ public class DashboardServiceImpl implements DashboardService {
         return BigDecimal.valueOf(val).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
+
     private Double calculateSelfServiceRate(boolean isMemberSpecific, long totalCalls) {
         if (isMemberSpecific || totalCalls == 0) {
             return 0.0;

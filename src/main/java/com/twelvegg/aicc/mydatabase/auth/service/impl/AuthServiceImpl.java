@@ -93,12 +93,10 @@ public class AuthServiceImpl implements AuthService {
         }
         
         // 1. 개인 통계 데이터 삭제 (Hard Delete) - 개인정보 보호 및 용량 확보
-        try {
-            memberMetricRepository.deleteByMember(member);
-        } catch (Exception e) {
-            // 통계 데이터가 없거나 삭제 중 오류가 발생해도, 계정 탈퇴는 진행되어야 함.
-            System.err.println("Warning: Failed to delete member metrics for user " + memberId);
-        }
+        // 1. 개인 통계 데이터 삭제 (Hard Delete) - 개인정보 보호 및 용량 확보
+        // [FIX] deleteByMember 실패 시 트랜잭션 롤백을 방지하기 위해 조회 후 삭제 패턴 적용
+        memberMetricRepository.findByMember(member)
+                .ifPresent(memberMetricRepository::delete);
 
         // 2. 회원 정보 익명화 및 상태 변경 (Soft Delete) - 이메일 난수화로 재가입 허용
         member.withdraw();

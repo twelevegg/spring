@@ -9,6 +9,7 @@ import com.twelvegg.aicc.mydatabase.auth.dto.AuthDto;
 import com.twelvegg.aicc.mydatabase.auth.repository.RefreshTokenRepository;
 import com.twelvegg.aicc.mydatabase.auth.service.AuthService;
 import com.twelvegg.aicc.mydatabase.member.domain.Member;
+import com.twelvegg.aicc.mydatabase.member.repository.MemberMetricRepository;
 import com.twelvegg.aicc.mydatabase.member.repository.MemberRepository;
 import com.twelvegg.aicc.mydatabase.tenant.domain.Tenant;
 import com.twelvegg.aicc.mydatabase.tenant.repository.TenantRepository;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 public class AuthServiceImpl implements AuthService {
 
     private final MemberRepository memberRepository;
+    private final MemberMetricRepository memberMetricRepository;
     private final TenantRepository tenantRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -72,7 +74,38 @@ public class AuthServiceImpl implements AuthService {
             throw new CustomException(ErrorCode.TENANT_NOT_FOUND);
         }
 
+        // 계정 탈퇴(RESIGNED) 여부 확인
+        if ("RESIGNED".equalsIgnoreCase(member.getStatus()) || "WITHDRAWN".equalsIgnoreCase(member.getStatus())) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND); // 보안상 '없는 회원' 취급하거나 별도 에러 코드 사용
+        }
+
         return generateTokens(member, member.getTenant().getName());
+    }
+
+    @Override
+    @Transactional
+    public void withdraw(Long memberId, String password) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        if (!passwordEncoder.matches(password, member.getPassword())) {
+            throw new CustomException(ErrorCode.INVALID_PASSWORD);
+        }
+        
+        // 1. 개인 통계 데이터 삭제 (Hard Delete) - 개인정보 보호 및 용량 확보
+        try {
+            memberMetricRepository.deleteByMember(member);
+        } catch (Exception e) {
+            // 통계 데이터가 없거나 삭제 중 오류가 발생해도, 계정 탈퇴는 진행되어야 함.
+            System.err.println("Warning: Failed to delete member metrics for user " + memberId);
+        }
+
+        // 2. 회원 정보 익명화 및 상태 변경 (Soft Delete) - 이메일 난수화로 재가입 허용
+        member.withdraw();
+        memberRepository.save(member); // 명시적 저장으로 변경사항 확실히 반영
+        
+        // 3. 리프레시 토큰 삭제 (로그아웃)
+        refreshTokenRepository.findByMember(member).ifPresent(refreshTokenRepository::delete);
     }
 
     @Override

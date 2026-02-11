@@ -43,4 +43,6 @@ public interface MemberMetricRepository extends JpaRepository<MemberMetric, Long
     Double findAvgScheduleAdherenceByMemberId(@Param("memberId") Long memberId);
 
     Optional<MemberMetric> findByMember(Member member);
+
+    void deleteByMember(Member member);
 }

@@ -58,4 +58,19 @@ public class Member {
         this.status = status;
         this.lastStatusUpdateTime = LocalDateTime.now();
     }
+
+    public void withdraw() {
+        this.status = "RESIGNED";
+        this.lastStatusUpdateTime = LocalDateTime.now();
+        
+        // 이메일 난수화: 재가입 허용 및 개인정보 보호
+        // 예: user@example.com -> deleted_timestamp_user@example.com
+        this.email = "deleted_" + System.currentTimeMillis() + "_" + this.email;
+        
+        // 이름 익명화
+        this.name = "Unknown User";
+        
+        // 비밀번호 파기 (랜덤 문자열로 변경하여 로그인 불가능하게 처리)
+        this.password = java.util.UUID.randomUUID().toString();
+    }
 }

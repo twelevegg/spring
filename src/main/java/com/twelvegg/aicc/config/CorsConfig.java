@@ -16,7 +16,8 @@ public class CorsConfig {
     // 로컬 + 운영(도메인) 허용
     private static final Set<String> ALLOWED_ORIGINS = Set.of(
             "http://localhost:5173",
-            "https://www.csnavigator.cloud"
+            "https://www.csnavigator.cloud",
+            "https://csnavigator.cloud"
     );
 
     @Bean

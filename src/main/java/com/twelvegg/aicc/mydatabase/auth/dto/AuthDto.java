@@ -13,6 +13,9 @@ public class AuthDto {
     public record PasswordChangeRequest(String currentPassword, String newPassword) {
     }
 
+    public record WithdrawRequest(String currentPassword) {
+    }
+
     @Builder
     public record TokenResponse(String accessToken, String refreshToken) {
     }

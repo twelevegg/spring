@@ -47,4 +47,12 @@ public class AuthController {
         authService.changePassword(memberId, request);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "회원 탈퇴", description = "로그인한 사용자의 계정을 탈퇴(Soft Delete) 처리하는 API")
+    @DeleteMapping("/withdraw")
+    public ResponseEntity<Void> withdraw(@RequestAttribute("memberId") Long memberId,
+            @RequestBody AuthDto.WithdrawRequest request) {
+        authService.withdraw(memberId, request.currentPassword());
+        return ResponseEntity.ok().build();
+    }
 }

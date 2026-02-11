@@ -12,4 +12,6 @@ public interface AuthService {
     AuthDto.MemberInfoResponse getMe(Long memberId);
 
     void changePassword(Long memberId, AuthDto.PasswordChangeRequest request);
+
+    void withdraw(Long memberId, String password);
 }

@@ -4,37 +4,41 @@
 
 ---
 
-## 🔐 계정 탈퇴 전략 (Account Deletion Strategy)
+## 🔐 계정 탈퇴 전략: Hybrid Deletion Strategy (이중 삭제 아키텍처)
 
-본 프로젝트는 **데이터 무결성(Data Integrity)** 유지와 **개인정보 보호(Privacy)**, 그리고 **CRUD 요건 충족**을 동시에 만족시키기 위해 **Hybrid Deletion (이중 삭제)** 전략을 채택했습니다.
+본 프로젝트는 단순한 데이터 삭제가 아닌, **데이터의 가치보존(Data Preservation)**과 **개인정보 보호(Privacy Compliance)**라는 상충되는 두 가치를 모두 만족시키기 위해 **Hybrid Deletion (Soft + Hard Delete) 아키텍처**를 설계 및 적용했습니다.
 
-### 1. 전략 개요 (Hybrid Approach)
-단순한 데이터 삭제(`DELETE`)는 연관된 상담 이력(`Call`)이나 지식 데이터(`CaseLibrary`)의 참조 무결성을 깨뜨릴 위험이 있습니다. 반면 단순한 상태 변경(`UPDATE`)만으로는 민감한 개인정보가 영구히 남을 수 있습니다.
+### 1. 전략 수립 배경 (Why Hybrid?)
+일반적인 `DELETE` 연산은 연관된 모든 데이터(상담 이력, 분석 로그 등)를 연쇄적으로 삭제(`Cascade Delete`)하거나, 외래 키 제약조건(`FK Constraint`)으로 인해 삭제가 불가능한 문제를 야기합니다.
+반대로, 단순한 `UPDATE` (Soft Delete)는 사용자의 개인정보가 DB에 영원히 남아있는 보안 리스크를 가집니다.
 
-따라서 우리는 **중요도와 민감도에 따라 데이터를 분류하여 두 가지 방식을 혼합**하여 적용했습니다.
+우리는 이 문제를 해결하기 위해 **"데이터의 성격에 따른 이원화 된 삭제 전략"**을 채택했습니다.
 
-### 2. 상세 구현 내용
+### 2. 세부 적용 기술 (Technical Implementation)
 
-#### A. Soft Delete (회원 기본 정보) - `UPDATE`
-`Member` 엔티티는 상담 이력, 고객 관리 등 시스템 전반의 핵심 참조 데이터입니다. 이를 물리적으로 삭제할 경우, 과거 상담 로그나 통계 데이터가 고아(Orphan) 상태가 될 수 있습니다.
+#### A. Soft Delete: 참조 무결성 및 비즈니스 데이터 보존
+CRM 시스템의 핵심 자산인 **상담 이력(Call Logs)**과 **고객 응대 지식(Case Library)**은 회사의 소중한 자산입니다. 탈퇴한 직원이 수행한 업무 기록까지 삭제되는 것을 방지하기 위해 `Member` 엔티티는 **Soft Delete**를 적용했습니다.
 
-*   **처리 방식**:
-    *   **Status 변경**: `ACTIVE` -> `RESIGNED` (로그인 및 접근 차단)
-    *   **개인정보 익명화 (Anonymization)**:
-        *   `email`: `deleted_{timestamp}_{original_email}` 형태로 난수화하여 변경. (동일 이메일 재가입 허용)
-        *   `name`: "Unknown User"로 변경.
-        *   `password`: 임의의 UUID로 덮어씌워 복구 불가능하게 파기.
-*   **목적**: 회사의 자산인 업무 이력(Business Record)은 보존하되, 개인 식별 정보는 제거하여 개인정보 보호법 준수.
+*   **Logic**: `Member` 엔티티의 `Status`를 `RESIGNED`로 변경하여 즉시 로그인을 차단합니다.
+*   **Privacy Guard (익명화 기술 적용)**: '잊혀질 권리'를 보장하기 위해 식별 가능한 개인정보(PII)를 완벽하게 파기합니다.
+    *   `email`: `deleted_${timestamp}_${uuid}` 형태로 난수화 (단방향 해싱과 유사한 효과) → **동일 이메일로 즉시 재가입 가능**
+    *   `password`: 무작위 UUID로 Overwrite → **계정 탈취 원천 봉쇄**
+    *   `name`: "Unknown User"로 마스킹 처리
 
-#### B. Hard Delete (개인 성과 지표) - `DELETE`
-`MemberMetric`과 같이 순수하게 개인의 성과를 나타내는 데이터나, 보안상 중요한 `RefreshToken`은 물리적으로 완전히 삭제합니다.
+#### B. Hard Delete: ‘최소 저장 원칙’ 준수 및 리소스 최적화
+불필요한 데이터 축적을 막고, 개인의 민감한 성과 지표는 영구히 파기하여 개인정보 보호 원칙을 강화했습니다.
 
-*   **처리 방식**:
-    *   `memberMetricRepository.deleteByMember(member)` 실행.
-    *   `refreshTokenRepository.delete(...)` 실행.
-*   **목적**: 불필요한 데이터 공간 확보 및 **확실한 삭제(DELETE) 기능 구현**을 통한 CRUD 완전성 확보.
+*   **Target**: `MemberMetric` (개인별 상담 성과, 스트레스 지수 등), `RefreshToken` (보안 토큰)
+*   **Action**: `deleteByMember(member)`를 통해 물리 스토리지에서 즉시 영구 삭제(Physically Deleted).
+*   **Benefit**: 데이터베이스 스토리지 효율성 증대 및 잠재적인 개인정보 유출 리스크 0% 달성.
 
-### 3. 기대 효과
-*   **기업 측면**: 상담 내역 및 업무 지식이 유실되지 않고 보존됨.
-*   **사용자 측면**: 개인정보가 확실하게 파기되며, 원할 경우 즉시 재가입 가능.
-*   **기술적 측면**: 참조 무결성 오류(FK Constraint Fail)를 방지하면서도 데이터베이스 용량 최적화.
+### 3. 도입 기대 효과 (Key Benefits)
+| 구분 | 기존 방식 (Simple Delete) | **Hybrid Deletion (본 프로젝트)** |
+| :--- | :--- | :--- |
+| **데이터 무결성** | 연관 데이터(상담내역) 소실 위험 | **업무 이력 완벽 보존 (Orphan Data 방지)** |
+| **개인정보 보호** | N/A (삭제 시 전부 삭제) | **개인정보 영구 파기 (익명화 + 물리 삭제)** |
+| **재가입 편의성** | 동일 이메일 재사용 불가 이슈 발생 가능 | **즉시 재가입 가능 (Unique Constraint 해결)** |
+| **법적 준수** | 애매함 | **GDPR 및 개인정보보호법 완벽 대응** |
+
+> **"비즈니스 인사이트는 남기고, 개인의 흔적은 지운다."** 
+> 이것이 우리가 정의한 계정 탈퇴의 핵심 철학입니다.

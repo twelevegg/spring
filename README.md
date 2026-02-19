@@ -1,59 +1,123 @@
-# spring
+# AICC Backend Service (Spring Boot)
 
-.env에 SPRING_API_KEY를 설정해야 합니다. (노션 참고)
+## 📌 Introduction (프로젝트 소개)
+**AI Contact Center (AICC) 플랫폼의 백엔드 서비스**입니다.  
+고객 상담 내역(Call), 녹취록(Transcript), AI 분석 결과(Summary, Sentiment)를 관리하며, 상담원(Member)과 고객(Customer), 상품(Product) 정보를 통합 관리하는 REST API 서버입니다.
+
+이 서비스는 **Spring Boot** 기반으로 구축되었으며, 상담 후처리와 실시간 분석 데이터를 저장하고 대시보드 및 관리자 페이지에 필요한 데이터를 제공합니다.
+
+> **Note**: `.env` 파일에 `SPRING_API_KEY`를 설정해야 합니다. (노션 참고)
 
 ---
 
-## 🔐 계정 탈퇴 전략: Hybrid Deletion Strategy (이중 삭제 아키텍처)
+## � Tech Stack (기술 스택)
+- **Language**: Java 17
+- **Framework**: Spring Boot 3.x
+- **Database**: MySQL / PostgreSQL (JPA/Hibernate)
+- **Security**: Spring Security + JWT (JSON Web Token)
+- **Storage**: AWS S3 (녹취 파일 및 데이터 저장)
+- **API Docs**: Swagger (SpringDoc OpenAPI)
+- **External Integration**: FastAPI (Python AI Server) - AI 분석 및 LLM 연동
 
-본 프로젝트는 단순한 데이터 삭제가 아닌, **데이터의 가치보존(Data Preservation)**과 **개인정보 보호(Privacy Compliance)**라는 상충되는 두 가치를 모두 만족시키기 위해 **Hybrid Deletion (Soft + Hard Delete) 아키텍처**를 설계 및 적용했습니다.
+---
 
-### 1. 전략 수립 배경 (Why Hybrid?)
-일반적인 `DELETE` 연산은 연관된 모든 데이터(상담 이력, 분석 로그 등)를 연쇄적으로 삭제(`Cascade Delete`)하거나, 외래 키 제약조건(`FK Constraint`)으로 인해 삭제가 불가능한 문제를 야기합니다.
-반대로, 단순한 `UPDATE` (Soft Delete)는 사용자의 개인정보가 DB에 영원히 남아있는 보안 리스크를 가집니다.
+## 🔑 Key Features (핵심 기능)
 
-우리는 이 문제를 해결하기 위해 **"데이터의 성격에 따른 이원화 된 삭제 전략"**을 채택했습니다.
+### 1. 상담 데이터 관리 (Call & Transcript Management)
+- 상담 통화(Call) 메타데이터 저장 (발신자, 수신자, 통화 시간, 비용 등)
+- **STT(Speech-to-Text)** 결과인 대화 내용(Transcript) 저장 및 조회
+- 통화 종료 후 AI가 분석한 **상담 요약(Post Call Summary)** 및 **핵심 키워드** 저장
 
-### 2. 세부 적용 기술 (Technical Implementation)
+### 2. AI 분석 결과 저장 (AI Analysis Storage)
+- **감정 분석(Sentiment Analysis)**: 고객의 감정 상태 및 만족도 지수(CES, CSAT, NPS) 저장
+- **실시간 분석(Realtime Analysis)**: 상담 중 발생한 특이사항 기록
+- **특이 케이스 감지(Abnormal/Violence Detection)**: 폭언, 욕설 등 민원성 패턴 감지 및 저장
 
-#### A. Soft Delete: 참조 무결성 및 비즈니스 데이터 보존
-CRM 시스템의 핵심 자산인 **상담 이력(Call Logs)**과 **고객 응대 지식(Case Library)**은 회사의 소중한 자산입니다. 탈퇴한 직원이 수행한 업무 기록까지 삭제되는 것을 방지하기 위해 `Member` 엔티티는 **Soft Delete**를 적용했습니다.
+### 3. 상품 및 고객 관리 (Product & Customer Management)
+- **상품(Product)**: 인터넷(Internet), IPTV, 모바일(Mobile) 요금제 정보 관리
+- **고객(Customer)**: 고객 정보 및 상담 이력 관리
+- **테넌트(Tenant) & 부서(Department)**: 멀티 테넌트 및 조직 구조 관리
 
-*   **Logic**: `Member` 엔티티의 `Status`를 `RESIGNED`로 변경하여 즉시 로그인을 차단합니다.
-*   **Privacy Guard (익명화 기술 적용)**: '잊혀질 권리'를 보장하기 위해 식별 가능한 개인정보(PII)를 완벽하게 파기합니다.
-    *   `email`: `deleted_${timestamp}_${uuid}` 형태로 난수화 (단방향 해싱과 유사한 효과) → **동일 이메일로 즉시 재가입 가능**
-    *   `password`: 무작위 UUID로 Overwrite → **계정 탈취 원천 봉쇄**
-    *   `name`: "Unknown User"로 마스킹 처리
+### 4. 대시보드 및 통계 (Dashboard & Analytics)
+- 상담원별 성과, 통화량, 민원 발생률 등 통계 데이터 제공
+- 관리자(Admin) 및 상담원(Agent)용 대시보드 API
 
-#### B. Hard Delete: ‘최소 저장 원칙’ 준수 및 리소스 최적화
-불필요한 데이터 축적을 막고, 개인의 민감한 성과 지표는 영구히 파기하여 개인정보 보호 원칙을 강화했습니다.
+---
 
-*   **Target**: `MemberMetric` (개인별 상담 성과, 스트레스 지수 등), `RefreshToken` (보안 토큰)
-*   **Action**: `deleteByMember(member)`를 통해 물리 스토리지에서 즉시 영구 삭제(Physically Deleted).
-*   **Benefit**: 데이터베이스 스토리지 효율성 증대 및 잠재적인 개인정보 유출 리스크 0% 달성.
+## 📊 Key Performance Indicators (KPIs)
 
-### 3. 도입 기대 효과 (Key Benefits)
-| 구분 | 기존 방식 (Simple Delete) | **Hybrid Deletion (본 프로젝트)** |
-| :--- | :--- | :--- |
-| **데이터 무결성** | 연관 데이터(상담내역) 소실 위험 | **업무 이력 완벽 보존 (Orphan Data 방지)** |
-| **개인정보 보호** | N/A (삭제 시 전부 삭제) | **개인정보 영구 파기 (익명화 + 물리 삭제)** |
-| **재가입 편의성** | 동일 이메일 재사용 불가 이슈 발생 가능 | **즉시 재가입 가능 (Unique Constraint 해결)** |
-| **법적 준수** | 애매함 | **GDPR 및 개인정보보호법 완벽 대응** |
+본 서비스는 AICC 운영 효율성을 모니터링하기 위해 다양한 KPI 데이터를 실시간으로 집계하여 제공합니다.
 
-> **"비즈니스 인사이트는 남기고, 개인의 흔적은 지운다."** 
-> 이것이 우리가 정의한 계정 탈퇴의 핵심 철학입니다.
+### 📈 Summary Metrics (핵심 지표)
+- **FCR (First Contact Resolution)**: 첫 번째 상담 해결률
+- **NPS (Net Promoter Score)**: 순수 추천 고객 지수 (고객 충성도)
+- **CES (Customer Effort Score)**: 고객 노력 점수 (상담 편의성)
+- **CSAT (Customer Satisfaction Score)**: 고객 만족도 점수
+- **Sentiment Score**: 상담 전체의 감정 분석 점수
 
-### 4. 실무형 아키텍처 비교 (Industry Best Practices)
+### 📞 Call Performance (통화 품질 지표)
+- **FRT (First Response Time)**: 최초 응답 시간
+- **Blocked Call Rate**: 통화 차단율 (연결 실패율)
+- **Abandonment Rate**: 상담 포기율 (대기 중 이탈)
+- **Active Waiting Calls**: 현재 대기 중인 통화 수
 
-단순한 구현을 넘어, 실제 엔터프라이즈 환경에서 고려되는 3가지 전략과 비교했을 때 본 프로젝트의 우수성은 다음과 같습니다.
+### ⚙️ Operations (운영 효율성)
+- **CPC (Cost Per Call)**: 통화당 비용
+- **Call Arrival Rate**: 시간당 통화 유입률
+- **Peak Time Traffic**: 피크 타임 트래픽
+- **Avg Call Duration**: 평균 통화 시간
+- **Avg Resolution Time**: 평균 해결 시간
 
-| 전략 | 설명 | 활용 사례 | 본 프로젝트의 차별점 |
-| :--- | :--- | :--- | :--- |
-| **① Simple Soft Delete** | `status='DELETED'`만 변경 | 금융권/ERP (법적 보관 의무) | 개인정보 보호(GDPR) 취약점 해결 (난수화 적용) |
-| **② Simple Hard Delete** | `DELETE WHERE id=?` | SNS/캐시 데이터 | Orphan Data(고아 데이터)로 인한 통계 왜곡 방지 |
-| **③ Hybrid & Anonymization** | **참조 유지 + 정보 파기** | **쿠팡, 배민, Slack 등** | **현업에서 가장 권장되는 방식 채택** |
+### 👨‍💼 Agent Productivity (상담원 생산성)
+- **Occupancy Rate**: 상담원 점유율 (통화 및 업무 시간 비율)
+- **Adherence**: 스케줄 준수율
+- **Calls Per Hour**: 시간당 처리 통화 건수
+- **ASA (Average Speed of Answer)**: 평균 응답 속도
+- **AHT (Average Handle Time)**: 평균 처리 시간 (통화 + 후처리)
+- **ACW (After Call Work)**: 후처리 작업 시간 (상담 종료 후 정리 시간)
 
-#### Why Enterprise-Grade? (현업 친화적 설계)
-1.  **법적 리스크 회피 (GDPR Compliant)**: 물리적 삭제가 아니더라도, 이메일/비밀번호를 복구 불가능하게 난수화하여 '식별 불가능성'을 달성, 컴플라이언스를 준수했습니다.
-2.  **비즈니스 연속성 (Business Continuity)**: 탈퇴한 유저의 상담 이력(`Call`)은 유지되므로, 회사의 자산인 데이터 통계와 분석(`MemberMetric` 제외)은 정확하게 유지됩니다.
-3.  **대규모 트래픽 고려 (Scalability)**: 탈퇴 즉시 `Unique Index` (이메일) 충돌을 해소하여, 동시다발적인 탈퇴/재가입 트래픽에서도 DB 락(Lock) 없이 유연하게 동작합니다.
+---
+
+## ⚙️ Main Service Logic (주요 서비스 로직)
+
+### 📞 Call Ingest (상담 데이터 수집)
+- **통화 종료(Call End)** 시점에 녹취록, 요약문, 감정 점수 등을 한 번에 수신하여 저장합니다.
+- `CallIngestService`를 통해 Call, Transcript, PostCallSummary, Customer 정보를 트랜잭션 단위로 처리합니다.
+
+### 📝 Product Catalog (상품 카탈로그)
+- 통신사 상품(인터넷, IPTV, 모바일)의 상세 정보를 조회하고 관리합니다.
+- 상담원이 고객에게 적합한 상품을 추천할 수 있도록 데이터를 제공합니다.
+
+### 🔐 Authentication (인증/인가)
+- **JWT** 기반의 인증 시스템을 사용하여 API 보안을 유지합니다.
+- 사용자 역할(Role)에 따른 API 접근 제어를 수행합니다.
+
+### 🗑️ 계정 탈퇴 전략: Hybrid Deletion Strategy (이중 삭제 아키텍처)
+본 프로젝트는 **데이터의 가치보존(Data Preservation)**과 **개인정보 보호(Privacy Compliance)**를 동시에 만족하기 위해 **Hybrid Deletion (Soft + Hard Delete) 아키텍처**를 적용했습니다.
+
+#### A. Soft Delete (비즈니스 데이터 보존)
+- **대상**: `Member` (상담원)
+- **방식**: `Status`를 `RESIGNED`로 변경하고 개인정보(이메일, 이름 등)를 **난수화(익명화)** 처리하여 '잊혀질 권리'를 보장하면서도 상담 이력은 유지합니다.
+
+#### B. Hard Delete (개인정보 파기)
+- **대상**: `MemberMetric` (개인 성과 지표), `RefreshToken`
+- **방식**: 물리 스토리지에서 즉시 **영구 삭제**하여 불필요한 개인 데이터 축적을 방지합니다.
+
+> **Why?** 단순 `DELETE`는 상담 이력 소실을 야기하고, 단순 `UPDATE`는 개인정보 보호 위반 소지가 있습니다. Hybrid 방식은 **GDPR 준수**와 **통계 정확성**을 모두 확보합니다.
+
+---
+
+## 🌐 API URL & Documentation
+
+서버가 실행되면 **Swagger UI**를 통해 전체 API 명세를 확인할 수 있습니다.
+
+- **Swagger UI**: `https://api.csnavigator.cloud/swagger-ui/index.html`
+- **API Specs**: `https://api.csnavigator.cloud/v3/api-docs`
+
+### Key Endpoints Example:
+| Method | URI | Description |
+|--------|-----|-------------|
+| `POST` | `/api/v1/calls/end` | 통화 종료 후 상담 데이터(녹취, 요약, 점수) 저장 |
+| `GET` | `/api/v1/products/mobile` | 모바일 상품 목록 조회 |
+| `GET` | `/api/v1/customers/{id}` | 특정 고객 정보 및 이력 조회 |
+| `POST` | `/api/v1/auth/login` | 로그인 및 토큰 발급 |
